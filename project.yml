@@ -1,0 +1,74 @@
+# XcodeGen spec — source of truth for TechCalc.xcodeproj.
+# Domain logic stays in the SwiftPM package (Package.swift) as TechCalcCore, and the shared
+# SwiftUI surface as TechCalcUI; the two app targets here compile only their thin OS shells
+# and link those libraries, so `import TechCalcCore` resolves to the same module the headless
+# test suite builds against. Regenerate with:  xcodegen generate
+name: TechCalc
+options:
+  bundleIdPrefix: com.jsglazer
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "17.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: "PWGXN26URQ"
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+
+packages:
+  TechCalc:
+    path: .
+
+targets:
+  # macOS is the v1 ship target.
+  TechCalcMac:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources/TechCalcMac
+    dependencies:
+      - package: TechCalc
+        product: TechCalcCore
+      - package: TechCalc
+        product: TechCalcUI
+    settings:
+      base:
+        PRODUCT_NAME: TechCalc
+        PRODUCT_BUNDLE_IDENTIFIER: com.jsglazer.techcalc
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: TechCalc
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Josh Glazer"
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+        COMBINE_HIDPI_IMAGES: YES
+
+  # iOS must compile and launch; it is not polished or released in v1.
+  TechCalcIOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Sources/TechCalcIOS
+    dependencies:
+      - package: TechCalc
+        product: TechCalcCore
+      - package: TechCalc
+        product: TechCalcUI
+    settings:
+      base:
+        PRODUCT_NAME: TechCalc
+        PRODUCT_BUNDLE_IDENTIFIER: com.jsglazer.techcalc.ios
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: TechCalc
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        CODE_SIGN_STYLE: Automatic

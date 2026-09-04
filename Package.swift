@@ -1,0 +1,53 @@
+// swift-tools-version: 6.0
+// tech-calc — a native scientific calculator with TI-84 Plus CE parity for macOS and iOS.
+// Targeted toolchain: Swift 6.3.3 / macOS 26.5 SDK. Deployment targets: macOS 14, iOS 17.
+//
+// TechCalcCore is the pure domain library: no SwiftUI/AppKit/UIKit/WebKit, no file I/O,
+// no clock or network reads, no external package dependencies. The whole headless gate
+// (`swift test`) runs against it with no app target present.
+import PackageDescription
+
+let package = Package(
+    name: "TechCalc",
+    platforms: [
+        .macOS(.v14),
+        .iOS(.v17)
+    ],
+    products: [
+        // Platform-agnostic domain logic. The machine-checkable gate runs against this.
+        .library(name: "TechCalcCore", targets: ["TechCalcCore"]),
+        // Shared SwiftUI surface. Platform differences are confined to #if os(...) blocks.
+        .library(name: "TechCalcUI", targets: ["TechCalcUI"])
+    ],
+    dependencies: [
+        // Intentionally empty: TechCalcCore declares zero external package dependencies.
+    ],
+    targets: [
+        // MARK: - Pure core
+        .target(
+            name: "TechCalcCore",
+            swiftSettings: [
+                .swiftLanguageMode(.v6)
+            ]
+        ),
+
+        // MARK: - Shared UI (app shells in Sources/TechCalcMac and Sources/TechCalcIOS
+        // are built by the XcodeGen project, not by SwiftPM.)
+        .target(
+            name: "TechCalcUI",
+            dependencies: ["TechCalcCore"],
+            swiftSettings: [
+                .swiftLanguageMode(.v6)
+            ]
+        ),
+
+        // MARK: - Deterministic headless tests
+        .testTarget(
+            name: "TechCalcCoreTests",
+            dependencies: ["TechCalcCore"],
+            swiftSettings: [
+                .swiftLanguageMode(.v6)
+            ]
+        )
+    ]
+)

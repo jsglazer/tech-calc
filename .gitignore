@@ -1,0 +1,16 @@
+.DS_Store
+NewBuild/
+CLAUDE.md
+GEMINI.md
+
+# Swift / SwiftPM build artifacts
+.build/
+.swiftpm/
+DerivedData/
+
+# Xcode
+xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Packaged artifacts
+dist/

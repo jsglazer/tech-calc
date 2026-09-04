@@ -1,0 +1,482 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		434D63FAF4D6FA9652E35D4E /* TechCalcUI in Frameworks */ = {isa = PBXBuildFile; productRef = F2927B021EA404D4B778F68A /* TechCalcUI */; };
+		4476F4CBD0073166CF752531 /* TechCalcUI in Frameworks */ = {isa = PBXBuildFile; productRef = 86C553E45D11AC9574530254 /* TechCalcUI */; };
+		5DD14B8E31DF485E1DE82BAD /* TechCalcMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7648E22942B5D1529379895 /* TechCalcMacApp.swift */; };
+		9828997EF13AEEE5D37A964E /* TechCalcIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA220B52EF2EB9AFD165FA9F /* TechCalcIOSApp.swift */; };
+		BE5D3D4682AF53806D292AF2 /* TechCalcCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0B8560644DEA664C8B7428EA /* TechCalcCore */; };
+		D5249ABCBD6BA42495A61B89 /* TechCalcCore in Frameworks */ = {isa = PBXBuildFile; productRef = 91D18F6BA22214FB80DC7ACB /* TechCalcCore */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		9674A2737FB591947E546A10 /* TechCalcMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TechCalcMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B7648E22942B5D1529379895 /* TechCalcMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechCalcMacApp.swift; sourceTree = "<group>"; };
+		D3E7A78457AF0B06987E0D5E /* TechCalcIOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TechCalcIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EDFC5EF9B55032E806B327EF /* tech-calc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "tech-calc"; path = .; sourceTree = SOURCE_ROOT; };
+		FA220B52EF2EB9AFD165FA9F /* TechCalcIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechCalcIOSApp.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		27A000873A10345DB54BFAEE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D5249ABCBD6BA42495A61B89 /* TechCalcCore in Frameworks */,
+				434D63FAF4D6FA9652E35D4E /* TechCalcUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FD3A811051887AD50DA44AAF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE5D3D4682AF53806D292AF2 /* TechCalcCore in Frameworks */,
+				4476F4CBD0073166CF752531 /* TechCalcUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4CB8510149679707331729D1 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				EDFC5EF9B55032E806B327EF /* tech-calc */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		8879480929B57781EFF185B8 /* TechCalcIOS */ = {
+			isa = PBXGroup;
+			children = (
+				FA220B52EF2EB9AFD165FA9F /* TechCalcIOSApp.swift */,
+			);
+			path = TechCalcIOS;
+			sourceTree = "<group>";
+		};
+		B6B88B615E90D720DA6BA9D2 /* TechCalcMac */ = {
+			isa = PBXGroup;
+			children = (
+				B7648E22942B5D1529379895 /* TechCalcMacApp.swift */,
+			);
+			path = TechCalcMac;
+			sourceTree = "<group>";
+		};
+		E9127A09677DC560779B1814 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D3E7A78457AF0B06987E0D5E /* TechCalcIOS.app */,
+				9674A2737FB591947E546A10 /* TechCalcMac.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F89452BA84831BBEF6CC0306 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				8879480929B57781EFF185B8 /* TechCalcIOS */,
+				B6B88B615E90D720DA6BA9D2 /* TechCalcMac */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		F99FCBE9DDD192554AF46406 = {
+			isa = PBXGroup;
+			children = (
+				4CB8510149679707331729D1 /* Packages */,
+				F89452BA84831BBEF6CC0306 /* Sources */,
+				E9127A09677DC560779B1814 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0E6CA72B509F47D701E792B5 /* TechCalcMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 038D546660571A2B1C388DD1 /* Build configuration list for PBXNativeTarget "TechCalcMac" */;
+			buildPhases = (
+				B8F1084EBE41FB4AB295AD69 /* Sources */,
+				FD3A811051887AD50DA44AAF /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TechCalcMac;
+			packageProductDependencies = (
+				0B8560644DEA664C8B7428EA /* TechCalcCore */,
+				86C553E45D11AC9574530254 /* TechCalcUI */,
+			);
+			productName = TechCalcMac;
+			productReference = 9674A2737FB591947E546A10 /* TechCalcMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+		0FC4FE656D0CF0C9342BEB8A /* TechCalcIOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 16926ECB3579B3F3C5F492B3 /* Build configuration list for PBXNativeTarget "TechCalcIOS" */;
+			buildPhases = (
+				B4B9273462D001336FF3A18F /* Sources */,
+				27A000873A10345DB54BFAEE /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TechCalcIOS;
+			packageProductDependencies = (
+				91D18F6BA22214FB80DC7ACB /* TechCalcCore */,
+				F2927B021EA404D4B778F68A /* TechCalcUI */,
+			);
+			productName = TechCalcIOS;
+			productReference = D3E7A78457AF0B06987E0D5E /* TechCalcIOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D8C21669B12163C8A7DDB64F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					0E6CA72B509F47D701E792B5 = {
+						DevelopmentTeam = PWGXN26URQ;
+						ProvisioningStyle = Automatic;
+					};
+					0FC4FE656D0CF0C9342BEB8A = {
+						DevelopmentTeam = PWGXN26URQ;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = C8A9304BC404829A06C016B7 /* Build configuration list for PBXProject "TechCalc" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = F99FCBE9DDD192554AF46406;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9221D271C9CB5119B3ECF4A0 /* XCLocalSwiftPackageReference "." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = E9127A09677DC560779B1814 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0E6CA72B509F47D701E792B5 /* TechCalcMac */,
+				0FC4FE656D0CF0C9342BEB8A /* TechCalcIOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B4B9273462D001336FF3A18F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9828997EF13AEEE5D37A964E /* TechCalcIOSApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B8F1084EBE41FB4AB295AD69 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5DD14B8E31DF485E1DE82BAD /* TechCalcMacApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		46E216E454DDF197C3910659 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TechCalc;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jsglazer.techcalc.ios;
+				PRODUCT_NAME = TechCalc;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6F8214F6A972B356DED81679 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TechCalc;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Josh Glazer";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jsglazer.techcalc;
+				PRODUCT_NAME = TechCalc;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		8304F4EF8562BA343AF19CC5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = PWGXN26URQ;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		9E383611B1D5EEA94A4C50B7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = PWGXN26URQ;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A04975174A8660BAD9B68F7D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TechCalc;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.jsglazer.techcalc.ios;
+				PRODUCT_NAME = TechCalc;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CD764C82E202CA239E8F4C52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = TechCalc;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Josh Glazer";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jsglazer.techcalc;
+				PRODUCT_NAME = TechCalc;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		038D546660571A2B1C388DD1 /* Build configuration list for PBXNativeTarget "TechCalcMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6F8214F6A972B356DED81679 /* Debug */,
+				CD764C82E202CA239E8F4C52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		16926ECB3579B3F3C5F492B3 /* Build configuration list for PBXNativeTarget "TechCalcIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46E216E454DDF197C3910659 /* Debug */,
+				A04975174A8660BAD9B68F7D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C8A9304BC404829A06C016B7 /* Build configuration list for PBXProject "TechCalc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E383611B1D5EEA94A4C50B7 /* Debug */,
+				8304F4EF8562BA343AF19CC5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		9221D271C9CB5119B3ECF4A0 /* XCLocalSwiftPackageReference "." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = .;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0B8560644DEA664C8B7428EA /* TechCalcCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TechCalcCore;
+		};
+		86C553E45D11AC9574530254 /* TechCalcUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TechCalcUI;
+		};
+		91D18F6BA22214FB80DC7ACB /* TechCalcCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TechCalcCore;
+		};
+		F2927B021EA404D4B778F68A /* TechCalcUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TechCalcUI;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = D8C21669B12163C8A7DDB64F /* Project object */;
+}
