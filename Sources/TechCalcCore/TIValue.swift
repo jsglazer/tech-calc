@@ -9,6 +9,9 @@ public struct TIList: Equatable, Hashable, Sendable, Codable {
 
     public init(_ values: [Complex] = []) { self.values = values }
     public init(reals: [Double]) { self.values = reals.map { Complex($0) } }
+    public init(repeating value: Complex, count: Int) {
+        self.values = Array(repeating: value, count: Swift.max(0, count))
+    }
 
     public var count: Int { values.count }
 
@@ -88,6 +91,8 @@ public enum TILimits {
     public static let maxListLength = 999
     public static let maxMatrixDimension = 99
     public static let maxHistoryEntries = 500
+    /// `randM(` draws integers in `-9...9`, matching the TI.
+    public static let randomMatrixMagnitude = 9
 }
 
 /// The one value type that crosses the evaluator.
@@ -137,6 +142,9 @@ public enum TIValue: Equatable, Hashable, Sendable {
             return Int(x)
         }
     }
+
+    /// What the TI shows for a command that acted rather than computed — `SortA(`, `Fill(`.
+    public static let done = TIValue.string("Done")
 
     public var isNumber: Bool {
         switch self {

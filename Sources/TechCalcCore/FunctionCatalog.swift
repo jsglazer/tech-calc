@@ -25,6 +25,14 @@ public enum FunctionID: String, Equatable, Hashable, Sendable, CaseIterable, Cod
     case logicalAnd, logicalOr, logicalXor, logicalNot
     // Constants
     case pi, eulersNumber, imaginaryUnit
+    // LIST OPS
+    case sortAscending, sortDescending, dimension, fill, sequence
+    case cumulativeSum, listDifference, augment, listToMatrix, matrixToList
+    // LIST MATH
+    case listSum, listProduct, listMean, listMedian, listStandardDeviation, listVariance
+    // MATRX MATH
+    case determinant, transpose, identityMatrix, randomMatrix
+    case rowEchelon, reducedRowEchelon, rowSwap, rowAdd, rowScale, rowScaleAdd
     // Display conversions
     case toFraction, toDecimal, toRectangular, toPolar
 }
@@ -64,8 +72,12 @@ public struct FunctionDefinition: Equatable, Sendable {
     /// Exactly what a keypad press inserts into the edit buffer.
     public let keypadToken: String
     /// True when the evaluator must receive the *unevaluated* arguments — `fnInt(`, `nDeriv(`
-    /// and `summation(` bind a variable over a sub-expression.
+    /// and `summation(` bind a variable over a sub-expression, and the list/matrix commands that
+    /// write into a named container need the container's *name*, not its current value.
     public let takesUnevaluatedArguments: Bool
+    /// True when a list argument is mapped element by element (`sin(L1)` is a list of sines).
+    /// The list and matrix commands set this false: they consume a whole container.
+    public let mapsOverLists: Bool
 
     public init(
         id: FunctionID,
@@ -76,7 +88,8 @@ public struct FunctionDefinition: Equatable, Sendable {
         arity: ClosedRange<Int>,
         argumentLabels: [String] = [],
         keypadToken: String? = nil,
-        takesUnevaluatedArguments: Bool = false
+        takesUnevaluatedArguments: Bool = false,
+        mapsOverLists: Bool = true
     ) {
         self.id = id
         self.name = name
@@ -87,6 +100,7 @@ public struct FunctionDefinition: Equatable, Sendable {
         self.argumentLabels = argumentLabels
         self.keypadToken = keypadToken ?? (form == .function ? name + "(" : name)
         self.takesUnevaluatedArguments = takesUnevaluatedArguments
+        self.mapsOverLists = mapsOverLists
     }
 
     /// Every spelling that tokenizes to this entry.
@@ -133,8 +147,8 @@ public enum FunctionCatalog {
         FunctionDefinition(id: .integerPart, name: "iPart", menuPath: "MATH NUM", arity: 1...1, argumentLabels: ["value"]),
         FunctionDefinition(id: .fractionalPart, name: "fPart", menuPath: "MATH NUM", arity: 1...1, argumentLabels: ["value"]),
         FunctionDefinition(id: .floorInt, name: "int", menuPath: "MATH NUM", arity: 1...1, argumentLabels: ["value"]),
-        FunctionDefinition(id: .minimum, name: "min", menuPath: "MATH NUM", arity: 2...2, argumentLabels: ["valueA", "valueB"]),
-        FunctionDefinition(id: .maximum, name: "max", menuPath: "MATH NUM", arity: 2...2, argumentLabels: ["valueA", "valueB"]),
+        FunctionDefinition(id: .minimum, name: "min", menuPath: "MATH NUM", arity: 1...2, argumentLabels: ["valueA", "valueB"], mapsOverLists: false),
+        FunctionDefinition(id: .maximum, name: "max", menuPath: "MATH NUM", arity: 1...2, argumentLabels: ["valueA", "valueB"], mapsOverLists: false),
         FunctionDefinition(id: .lcm, name: "lcm", menuPath: "MATH NUM", arity: 2...2, argumentLabels: ["valueA", "valueB"]),
         FunctionDefinition(id: .gcd, name: "gcd", menuPath: "MATH NUM", arity: 2...2, argumentLabels: ["valueA", "valueB"]),
         FunctionDefinition(id: .remainder, name: "remainder", menuPath: "MATH NUM", arity: 2...2, argumentLabels: ["dividend", "divisor"]),
@@ -178,6 +192,67 @@ public enum FunctionCatalog {
         FunctionDefinition(id: .pi, name: "π", aliases: ["pi"], menuPath: "2ND KEYPAD", form: .constant, arity: 0...0),
         FunctionDefinition(id: .eulersNumber, name: "e", menuPath: "2ND KEYPAD", form: .constant, arity: 0...0),
         FunctionDefinition(id: .imaginaryUnit, name: "i", menuPath: "2ND KEYPAD", form: .constant, arity: 0...0),
+
+        // MARK: LIST OPS — the commands that write into a named container take their arguments
+        // unevaluated, because they need the container's *name*, not a copy of its value.
+        FunctionDefinition(id: .sortAscending, name: "SortA", menuPath: "2ND LIST OPS", arity: 1...1,
+                           argumentLabels: ["list"], takesUnevaluatedArguments: true, mapsOverLists: false),
+        FunctionDefinition(id: .sortDescending, name: "SortD", menuPath: "2ND LIST OPS", arity: 1...1,
+                           argumentLabels: ["list"], takesUnevaluatedArguments: true, mapsOverLists: false),
+        FunctionDefinition(id: .dimension, name: "dim", menuPath: "2ND LIST OPS", arity: 1...1,
+                           argumentLabels: ["container"], mapsOverLists: false),
+        FunctionDefinition(id: .fill, name: "Fill", menuPath: "2ND LIST OPS", arity: 2...2,
+                           argumentLabels: ["value", "container"], takesUnevaluatedArguments: true, mapsOverLists: false),
+        FunctionDefinition(id: .sequence, name: "seq", menuPath: "2ND LIST OPS", arity: 4...5,
+                           argumentLabels: ["expression", "variable", "start", "end", "step"],
+                           takesUnevaluatedArguments: true, mapsOverLists: false),
+        FunctionDefinition(id: .cumulativeSum, name: "cumSum", menuPath: "2ND LIST OPS", arity: 1...1,
+                           argumentLabels: ["list"], mapsOverLists: false),
+        FunctionDefinition(id: .listDifference, name: "\u{0394}List", aliases: ["DeltaList"], menuPath: "2ND LIST OPS",
+                           arity: 1...1, argumentLabels: ["list"], mapsOverLists: false),
+        FunctionDefinition(id: .augment, name: "augment", menuPath: "2ND LIST OPS", arity: 2...2,
+                           argumentLabels: ["first", "second"], mapsOverLists: false),
+        FunctionDefinition(id: .listToMatrix, name: "List\u{25B8}matr", menuPath: "2ND LIST OPS", arity: 2...11,
+                           argumentLabels: ["list", "matrix"], takesUnevaluatedArguments: true, mapsOverLists: false),
+        FunctionDefinition(id: .matrixToList, name: "Matr\u{25B8}list", menuPath: "MATRX MATH", arity: 2...11,
+                           argumentLabels: ["matrix", "list"], takesUnevaluatedArguments: true, mapsOverLists: false),
+
+        // MARK: LIST MATH — pure reductions. The statistics phase calls these rather than
+        // reimplementing them, so `1-Var Stats` and `mean(` cannot disagree.
+        FunctionDefinition(id: .listSum, name: "sum", menuPath: "2ND LIST MATH", arity: 1...3,
+                           argumentLabels: ["list", "start", "end"], mapsOverLists: false),
+        FunctionDefinition(id: .listProduct, name: "prod", menuPath: "2ND LIST MATH", arity: 1...3,
+                           argumentLabels: ["list", "start", "end"], mapsOverLists: false),
+        FunctionDefinition(id: .listMean, name: "mean", menuPath: "2ND LIST MATH", arity: 1...1,
+                           argumentLabels: ["list"], mapsOverLists: false),
+        FunctionDefinition(id: .listMedian, name: "median", menuPath: "2ND LIST MATH", arity: 1...1,
+                           argumentLabels: ["list"], mapsOverLists: false),
+        FunctionDefinition(id: .listStandardDeviation, name: "stdDev", menuPath: "2ND LIST MATH", arity: 1...1,
+                           argumentLabels: ["list"], mapsOverLists: false),
+        FunctionDefinition(id: .listVariance, name: "variance", menuPath: "2ND LIST MATH", arity: 1...1,
+                           argumentLabels: ["list"], mapsOverLists: false),
+
+        // MARK: MATRX MATH — pure Swift throughout; see MatrixMath for the elimination.
+        FunctionDefinition(id: .determinant, name: "det", menuPath: "MATRX MATH", arity: 1...1,
+                           argumentLabels: ["matrix"], mapsOverLists: false),
+        FunctionDefinition(id: .transpose, name: "\u{1D40}", menuPath: "MATRX MATH", form: .postfix, arity: 1...1,
+                           argumentLabels: ["matrix"], mapsOverLists: false),
+        FunctionDefinition(id: .identityMatrix, name: "identity", menuPath: "MATRX MATH", arity: 1...1,
+                           argumentLabels: ["size"], mapsOverLists: false),
+        FunctionDefinition(id: .randomMatrix, name: "randM", menuPath: "MATRX MATH", arity: 2...2,
+                           argumentLabels: ["rows", "columns"], mapsOverLists: false),
+        FunctionDefinition(id: .rowEchelon, name: "ref", menuPath: "MATRX MATH", arity: 1...1,
+                           argumentLabels: ["matrix"], mapsOverLists: false),
+        FunctionDefinition(id: .reducedRowEchelon, name: "rref", menuPath: "MATRX MATH", arity: 1...1,
+                           argumentLabels: ["matrix"], mapsOverLists: false),
+        FunctionDefinition(id: .rowSwap, name: "rowSwap", menuPath: "MATRX MATH", arity: 3...3,
+                           argumentLabels: ["matrix", "rowA", "rowB"], mapsOverLists: false),
+        FunctionDefinition(id: .rowAdd, name: "row+", menuPath: "MATRX MATH", arity: 3...3,
+                           argumentLabels: ["matrix", "source", "target"], mapsOverLists: false),
+        FunctionDefinition(id: .rowScale, name: "*row", menuPath: "MATRX MATH", arity: 3...3,
+                           argumentLabels: ["factor", "matrix", "row"], mapsOverLists: false),
+        FunctionDefinition(id: .rowScaleAdd, name: "*row+", menuPath: "MATRX MATH", arity: 4...4,
+                           argumentLabels: ["factor", "matrix", "source", "target"], mapsOverLists: false),
 
         // MARK: Display conversions
         FunctionDefinition(id: .toFraction, name: "▸Frac", menuPath: "MATH MATH", form: .displayConversion, arity: 1...1, argumentLabels: ["value"]),

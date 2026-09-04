@@ -30,6 +30,38 @@ enum Fixture {
         return calculator.enter(source).display
     }
 
+    /// Container names, unwrapped once here so the suites read as TI syntax does.
+    static func listName(_ number: Int) -> ListName {
+        guard let name = ListName(number: number) else { preconditionFailure("L\(number) is not a list") }
+        return name
+    }
+
+    static func namedList(_ text: String) -> ListName {
+        guard let name = ListName(name: text) else { preconditionFailure("\(text) is not a list name") }
+        return name
+    }
+
+    static func matrixName(_ letter: Character) -> MatrixName {
+        guard let name = MatrixName(letter: letter) else { preconditionFailure("[\(letter)] is not a matrix") }
+        return name
+    }
+
+    /// Evaluates one line and returns the resulting list.
+    static func list(_ source: String, mode: CalculatorMode = .default, seed: UInt64 = 1) throws -> [Complex] {
+        guard case .list(let list) = try value(source, mode: mode, seed: seed) else { throw TIError.dataType }
+        return list.values
+    }
+
+    /// Evaluates one line and returns the resulting matrix as rows of reals.
+    static func matrixRows(_ source: String, mode: CalculatorMode = .default, seed: UInt64 = 1) throws -> [[Double]] {
+        guard case .matrix(let matrix) = try value(source, mode: mode, seed: seed) else { throw TIError.dataType }
+        return (1...matrix.rows).map { row in
+            (1...matrix.columns).compactMap { column in
+                try? matrix[tiRow: row, tiColumn: column].re
+            }
+        }
+    }
+
     /// Relative comparison at the 1e-9 numeric-parity bar the pre-build decisions set.
     static func isClose(_ a: Double, _ b: Double, relativeTolerance: Double = 1e-9) -> Bool {
         if a == b { return true }
@@ -51,6 +83,23 @@ func expectClose(
         comment ?? "\(actual) is not within \(tolerance) of \(expected)",
         sourceLocation: sourceLocation
     )
+}
+
+/// Asserts a matrix element by element at the numeric-parity tolerance. Partial pivoting means
+/// an inverse or a reduction lands within rounding of the exact value rather than on it.
+func expectMatrix(
+    _ actual: [[Double]],
+    _ expected: [[Double]],
+    tolerance: Double = 1e-12,
+    sourceLocation: SourceLocation = #_sourceLocation
+) {
+    #expect(actual.count == expected.count, "row count", sourceLocation: sourceLocation)
+    for (actualRow, expectedRow) in zip(actual, expected) {
+        #expect(actualRow.count == expectedRow.count, "column count", sourceLocation: sourceLocation)
+        for (actualValue, expectedValue) in zip(actualRow, expectedRow) {
+            expectClose(actualValue, expectedValue, tolerance: tolerance, sourceLocation: sourceLocation)
+        }
+    }
 }
 
 /// Asserts that evaluating `source` fails with a specific TI error name — error parity is part

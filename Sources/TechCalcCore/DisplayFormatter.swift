@@ -29,16 +29,19 @@ public struct DisplayFormatter: Sendable {
         case .complex(let z):
             return string(forComplex: z)
         case .list(let list):
-            return "{" + list.values.map { string(forComplex: $0) }.joined(separator: " ") + "}"
+            // The delimiters come from `ContainerSyntax`, the same place the tokenizer reads
+            // them. Elements are separated by spaces, as the TI displays them.
+            let elements = list.values.map { string(forComplex: $0) }.joined(separator: " ")
+            return "\(ContainerSyntax.listOpen)\(elements)\(ContainerSyntax.listClose)"
         case .matrix(let matrix):
             let rows = (1...matrix.rows).map { row -> String in
                 let cells = (1...matrix.columns).compactMap { column -> String? in
                     guard let element = try? matrix[tiRow: row, tiColumn: column] else { return nil }
                     return string(forComplex: element)
                 }
-                return "[" + cells.joined(separator: " ") + "]"
+                return "\(ContainerSyntax.matrixOpen)\(cells.joined(separator: " "))\(ContainerSyntax.matrixClose)"
             }
-            return "[" + rows.joined() + "]"
+            return "\(ContainerSyntax.matrixOpen)\(rows.joined())\(ContainerSyntax.matrixClose)"
         case .string(let text):
             return text
         }

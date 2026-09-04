@@ -19,9 +19,9 @@ struct PersistenceTests {
         calculator.enter("5→A")
         calculator.enter("A*3")
         calculator.enter("1/0")               // an error row must survive too
-        calculator.lists["L1"] = TIList(reals: [1, 2, 3])
-        calculator.lists["HEIGHT"] = TIList(reals: [70.5, 68])
-        calculator.matrices["[A]"] = try TIMatrix(rows: 2, columns: 2, values: [
+        calculator.lists[Fixture.listName(1)] = TIList(reals: [1, 2, 3])
+        calculator.lists[Fixture.namedList("HEIGH")] = TIList(reals: [70.5, 68])
+        calculator.matrices[Fixture.matrixName("A")] = try TIMatrix(rows: 2, columns: 2, values: [
             Complex(1), Complex(2), Complex(3), Complex(4)
         ])
         return calculator
@@ -42,6 +42,40 @@ struct PersistenceTests {
         #expect(restored.matrices == original.matrices)
         #expect(restored.history == original.history)
         #expect(restored.document() == original.document())
+    }
+
+    @Test("Lists and matrices entered as TI syntax survive a save and reload")
+    func containerRoundtrip() throws {
+        var original = Fixture.calculator()
+        original.enter("{1,2,3}→L1")
+        original.enter("{4.5,-6}→L6")
+        original.enter("{70.5,68}→∟HEIGH")
+        original.enter("[[1,2][3,4]]→[A]")
+        original.enter("identity(3)→[J]")
+
+        let store = DocumentStore(provider: InMemoryStorageProvider())
+        try original.save(to: store)
+        var restored = try Calculator.loaded(from: store, random: SeededRandomSource(seed: 1))
+
+        #expect(restored.lists == original.lists)
+        #expect(restored.matrices == original.matrices)
+        // The restored containers are reachable by the same TI syntax that stored them.
+        #expect(try restored.evaluate("L1(2)").result == .real(2))
+        #expect(try restored.evaluate("L6(1)").result == .real(4.5))
+        #expect(try restored.evaluate("∟HEIGH(1)").result == .real(70.5))
+        #expect(try restored.evaluate("det([A])").result == .real(-2))
+        #expect(try restored.evaluate("[J](3,3)").result == .real(1))
+    }
+
+    @Test("A container name the build does not recognise is dropped, not fatal")
+    func unknownContainerKeysAreDropped() throws {
+        var document = CalculatorDocument()
+        document.lists = ["L1": TIList(reals: [1, 2]), "L9": TIList(reals: [3])]
+        document.matrices = ["[A]": try TIMatrix(rows: 1, columns: 1), "[Z]": try TIMatrix(rows: 1, columns: 1)]
+
+        let restored = Calculator.restored(from: document, random: SeededRandomSource(seed: 1))
+        #expect(restored.lists.keys.sorted(by: { $0.key < $1.key }) == [Fixture.listName(1)])
+        #expect(Array(restored.matrices.keys) == [Fixture.matrixName("A")])
     }
 
     @Test("History rows keep their inputs, results, errors and order")

@@ -21,8 +21,42 @@ struct FunctionCatalogTests {
         .acosh: ["2"],
         .numericIntegral: ["X", "X", "0", "1"],
         .numericDerivative: ["X", "X", "2"],
-        .summation: ["X", "X", "1", "3"]
+        .summation: ["X", "X", "1", "3"],
+
+        // The list and matrix menus, exercised on literals so the entries need no stored state.
+        .minimum: [list],
+        .maximum: [list],
+        .sortAscending: ["L1"],
+        .sortDescending: ["L1"],
+        .dimension: [list],
+        .fill: ["0", "L1"],
+        .sequence: ["X", "X", "1", "3"],
+        .cumulativeSum: [list],
+        .listDifference: [list],
+        .augment: [list, list],
+        .listToMatrix: [list, "[A]"],
+        .matrixToList: [matrix, "L1"],
+        .listSum: [list],
+        .listProduct: [list],
+        .listMean: [list],
+        .listMedian: [list],
+        .listStandardDeviation: [list],
+        .listVariance: [list],
+        .determinant: [matrix],
+        .transpose: [matrix],
+        .identityMatrix: ["3"],
+        .randomMatrix: ["2", "2"],
+        .rowEchelon: [matrix],
+        .reducedRowEchelon: [matrix],
+        .rowSwap: [matrix, "1", "2"],
+        .rowAdd: [matrix, "1", "2"],
+        .rowScale: ["2", matrix, "1"],
+        .rowScaleAdd: ["2", matrix, "1", "2"]
     ]
+
+    private static let list = "{1,2,3}"
+    private static let matrix = "[[1,2][3,4]]"
+
 
     private static func arguments(for definition: FunctionDefinition) -> [String] {
         if let explicit = representativeArguments[definition.id] { return explicit }

@@ -104,6 +104,23 @@ struct CoreConventionTests {
         }
     }
 
+    @Test("Container delimiters are declared only in ContainerName.swift")
+    func containerDelimitersLiveInOnePlace() throws {
+        // The braces and brackets are read from `ContainerSyntax` by the tokenizer, the keypad
+        // and the formatter, so a literal delimiter must not appear in any of them.
+        let literals = ["\"{\"", "\"}\"", "\"[\"", "\"]\"", "\"L\"", "\"\u{221F}\""]
+        for literal in literals {
+            var filesContaining: [String] = []
+            for url in try Self.coreSourceFiles {
+                if try Self.code(of: url).contains(literal) {
+                    filesContaining.append(url.lastPathComponent)
+                }
+            }
+            #expect(filesContaining.isEmpty || filesContaining == ["ContainerName.swift"],
+                    "\(literal) appears in \(filesContaining)")
+        }
+    }
+
     @Test("The package declares no external dependencies")
     func packageHasNoDependencies() throws {
         let testFile = URL(fileURLWithPath: #filePath)
@@ -130,7 +147,8 @@ struct CoreConventionTests {
             .appendingPathComponent("TechCalcCore")
 
         // A representative spread of spellings that must appear in exactly one source file.
-        let spellings = ["\"sin\"", "\"logBASE\"", "\"nCr\"", "\"fnInt\"", "\"randInt\"", "\"iPart\""]
+        let spellings = ["\"sin\"", "\"logBASE\"", "\"nCr\"", "\"fnInt\"", "\"randInt\"", "\"iPart\"",
+                         "\"det\"", "\"rref\"", "\"cumSum\"", "\"SortA\"", "\"stdDev\"", "\"randM\""]
         for spelling in spellings {
             var filesContaining: [String] = []
             for url in try Self.coreSourceFiles {

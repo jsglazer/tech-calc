@@ -59,4 +59,14 @@ public enum Token: Equatable, Sendable {
     case comma
     /// `STO▸`.
     case store
+    /// A stored list: `L1`-`L6` or `∟NAME`.
+    case listName(ListName)
+    /// A stored matrix: `[A]`-`[J]`.
+    case matrixName(MatrixName)
+    /// `{` and `}` — the list literal delimiters.
+    case leftBrace
+    case rightBrace
+    /// `[` and `]` — the matrix literal delimiters.
+    case leftBracket
+    case rightBracket
 }

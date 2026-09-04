@@ -57,21 +57,132 @@ private struct ParserState {
 
         if case .store = current {
             advance()
-            switch current {
-            case .variable(let name):
-                advance()
-                expression = .store(expression, .variable(name))
-            case .constant(.random):
-                // `seed STO▸ rand` restarts the random stream, as on the TI.
-                advance()
-                expression = .store(expression, .randomSeed)
-            default:
-                throw TIError.syntax
-            }
+            expression = .store(expression, try parseStoreTarget())
         }
 
         guard position == tokens.count else { throw TIError.syntax }
         return expression
+    }
+
+    /// What follows `STO▸`: a variable, `rand`, a whole container, one container element, or a
+    /// container's `dim(`.
+    private mutating func parseStoreTarget() throws -> StoreTarget {
+        switch current {
+        case .variable(let name):
+            advance()
+            return .variable(name)
+
+        case .constant(.random):
+            // `seed STO▸ rand` restarts the random stream, as on the TI.
+            advance()
+            return .randomSeed
+
+        case .listName(let name):
+            advance()
+            guard case .leftParenthesis = current else { return .list(name) }
+            advance()
+            let index = try parseExpression(minimumBindingPower: 0)
+            try consumeClosingParenthesis()
+            return .listElement(name, index)
+
+        case .matrixName(let name):
+            advance()
+            guard case .leftParenthesis = current else { return .matrix(name) }
+            advance()
+            let row = try parseExpression(minimumBindingPower: 0)
+            guard case .comma = current else { throw TIError.syntax }
+            advance()
+            let column = try parseExpression(minimumBindingPower: 0)
+            try consumeClosingParenthesis()
+            return .matrixElement(name, row, column)
+
+        case .function(.dimension):
+            // `5→dim(L1)` resizes; `{2,3}→dim([A])` reshapes.
+            advance()
+            guard case .leftParenthesis = current else { throw TIError.syntax }
+            advance()
+            let target: StoreTarget
+            switch current {
+            case .listName(let name): target = .listDimension(name)
+            case .matrixName(let name): target = .matrixDimension(name)
+            default: throw TIError.syntax
+            }
+            advance()
+            try consumeClosingParenthesis()
+            return target
+
+        default:
+            throw TIError.syntax
+        }
+    }
+
+    /// Only a container can be subscripted, which is what keeps `L1(2)` an element access while
+    /// `2(3)` stays implicit multiplication.
+    private func isIndexable(_ expression: Expression) -> Bool {
+        switch expression {
+        case .listVariable, .matrixVariable, .listLiteral, .matrixLiteral, .element: true
+        default: false
+        }
+    }
+
+    /// `{1,2,3}`. An unclosed brace auto-closes, as ENTER does with parentheses.
+    private mutating func parseListLiteral() throws -> Expression {
+        advance()
+        var elements: [Expression] = []
+        if case .rightBrace = current {
+            advance()
+            return .listLiteral(elements)
+        }
+        while true {
+            elements.append(try parseExpression(minimumBindingPower: 0))
+            if case .comma = current {
+                advance()
+                continue
+            }
+            try consumeClosing(.rightBrace)
+            break
+        }
+        return .listLiteral(elements)
+    }
+
+    /// `[[1,2][3,4]]`, with the comma between rows the TI also accepts.
+    private mutating func parseMatrixLiteral() throws -> Expression {
+        advance()
+        var rows: [[Expression]] = []
+        while true {
+            guard case .leftBracket = current else { throw TIError.syntax }
+            advance()
+            var row: [Expression] = []
+            while true {
+                row.append(try parseExpression(minimumBindingPower: 0))
+                if case .comma = current {
+                    advance()
+                    continue
+                }
+                try consumeClosing(.rightBracket)
+                break
+            }
+            rows.append(row)
+            if case .comma = current { advance() }
+            if case .leftBracket = current { continue }
+            try consumeClosing(.rightBracket)
+            break
+        }
+        // A ragged literal is a dimension error, not a silently padded matrix.
+        guard let width = rows.first?.count, width >= 1, rows.allSatisfy({ $0.count == width }) else {
+            throw TIError.invalidDimension
+        }
+        return .matrixLiteral(rows)
+    }
+
+    /// Consumes a specific closing delimiter, recording an auto-close when the input just ended.
+    private mutating func consumeClosing(_ token: Token) throws {
+        if current == token {
+            advance()
+            return
+        }
+        guard current == nil else { throw TIError.syntax }
+        autoClosedParentheses = true
     }
 
     mutating func parseExpression(minimumBindingPower: Int) throws -> Expression {
@@ -104,6 +215,22 @@ private struct ParserState {
                 if BindingPower.displayConversion < minimumBindingPower { break loop }
                 advance()
                 left = .displayConversion(id, left)
+
+            case .leftParenthesis where isIndexable(left):
+                // `L1(2)` and `[A](1,2)` are element access, not a product with a parenthesis.
+                if BindingPower.postfix < minimumBindingPower { break loop }
+                advance()
+                var subscripts: [Expression] = []
+                while true {
+                    subscripts.append(try parseExpression(minimumBindingPower: 0))
+                    if case .comma = current {
+                        advance()
+                        continue
+                    }
+                    try consumeClosingParenthesis()
+                    break
+                }
+                left = .element(left, subscripts)
 
             default:
                 // Implicit multiplication: two operands with nothing between them.
@@ -158,6 +285,20 @@ private struct ParserState {
         case .function(let id):
             advance()
             return .call(id, try parseArguments(for: id))
+
+        case .listName(let name):
+            advance()
+            return .listVariable(name)
+
+        case .matrixName(let name):
+            advance()
+            return .matrixVariable(name)
+
+        case .leftBrace:
+            return try parseListLiteral()
+
+        case .leftBracket:
+            return try parseMatrixLiteral()
 
         default:
             throw TIError.syntax
@@ -215,6 +356,7 @@ private struct ParserState {
     private func startsOperand(_ token: Token) -> Bool {
         switch token {
         case .number, .variable, .ans, .constant, .function, .leftParenthesis: true
+        case .listName, .matrixName, .leftBrace, .leftBracket: true
         default: false
         }
     }

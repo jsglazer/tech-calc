@@ -37,7 +37,11 @@ public struct Tokenizer: Sendable {
         ("<", .binaryOperator(.less)),
         ("(", .leftParenthesis),
         (")", .rightParenthesis),
-        (",", .comma)
+        (",", .comma),
+        (String(ContainerSyntax.listOpen), .leftBrace),
+        (String(ContainerSyntax.listClose), .rightBrace),
+        (String(ContainerSyntax.matrixOpen), .leftBracket),
+        (String(ContainerSyntax.matrixClose), .rightBracket)
     ]
 
     /// Longest-match punctuation, so `≥`'s ASCII spelling `>=` is not read as `>` then `=`.
@@ -76,6 +80,12 @@ public struct Tokenizer: Sendable {
                 continue
             }
 
+            if let match = scanContainerName(characters, at: index) {
+                tokens.append(match.token)
+                index += match.length
+                continue
+            }
+
             // Reached only when the catalog did not match `⁻¹`: a bare `⁻` is the negation key.
             if character == Self.negationCharacter {
                 tokens.append(.negation)
@@ -108,6 +118,46 @@ public struct Tokenizer: Sendable {
     }
 
     // MARK: - Scanners
+
+    /// A stored container name: `[A]`-`[J]`, `L1`-`L6` (or `L₁`-`L₆`), and `∟NAME`.
+    ///
+    /// `L` followed immediately by a digit is a list, never the variable `L` times that digit —
+    /// the TI writes the numbered lists as single subscripted glyphs, and this is the typed
+    /// stand-in for them.
+    private func scanContainerName(_ characters: [Character], at index: Int) -> (token: Token, length: Int)? {
+        let character = characters[index]
+
+        if character == ContainerSyntax.matrixOpen,
+           index + 2 < characters.count,
+           characters[index + 2] == ContainerSyntax.matrixClose,
+           let name = MatrixName(letter: characters[index + 1]) {
+            return (.matrixName(name), 3)
+        }
+
+        if character == ContainerSyntax.numberedListPrefix, index + 1 < characters.count {
+            let next = characters[index + 1]
+            let number = Self.isDigit(next) ? next.wholeNumberValue : ContainerSyntax.subscriptDigits[next]
+            if let number, let name = ListName(number: number) {
+                return (.listName(name), 2)
+            }
+        }
+
+        if character == ContainerSyntax.namedListPrefix {
+            var length = 1
+            var text = ""
+            while index + length < characters.count,
+                  characters[index + length].isLetter || Self.isDigit(characters[index + length]),
+                  text.count < ListName.maximumNamedLength {
+                text.append(characters[index + length])
+                length += 1
+            }
+            if let name = ListName(name: text) {
+                return (.listName(name), length)
+            }
+        }
+
+        return nil
+    }
 
     private func token(for definition: FunctionDefinition) -> Token? {
         switch definition.form {

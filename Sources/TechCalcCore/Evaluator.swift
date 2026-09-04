@@ -32,11 +32,12 @@ public struct Evaluator: Sendable {
             return try evaluateConstant(id)
 
         case .negation(let inner):
-            return .number(-(try evaluate(inner).asComplex))
+            return try negated(try evaluate(inner))
 
         case .binary(let op, let left, let right):
             let lhs = try evaluate(left)
             let rhs = try evaluate(right)
+            if let container = try applyToContainers(op, lhs, rhs) { return container }
             return try apply(op, lhs, rhs)
 
         case .displayConversion(_, let inner):
@@ -45,21 +46,40 @@ public struct Evaluator: Sendable {
 
         case .store(let inner, let target):
             let value = try evaluate(inner)
-            switch target {
-            case .variable(let name):
-                try context.setValue(try value.asComplex, for: name)
-            case .randomSeed:
-                random.reseed(UInt64(bitPattern: Int64(try value.asInteger)))
-            }
+            try store(value, into: target)
             return value
+
+        case .listLiteral(let elements):
+            return try evaluateListLiteral(elements)
+
+        case .matrixLiteral(let rows):
+            return try evaluateMatrixLiteral(rows)
+
+        case .listVariable(let name):
+            return .list(context.list(name))
+
+        case .matrixVariable(let name):
+            return .matrix(try context.matrix(name))
+
+        case .element(let base, let subscripts):
+            return try evaluateElement(base, subscripts)
 
         case .call(let id, let arguments):
             guard let definition = FunctionCatalog.definition(for: id) else { throw TIError.undefined }
             guard definition.arity.contains(arguments.count) else { throw TIError.syntax }
             if definition.takesUnevaluatedArguments {
+                if let command = try evaluateContainerCommand(id, arguments) { return command }
                 return try evaluateBinding(id, arguments)
             }
-            let values = try arguments.map { try evaluate($0) }
+            var values: [TIValue] = []
+            for argument in arguments {
+                values.append(try evaluate(argument))
+            }
+            if let container = try applyContainerFunction(id, values) { return container }
+            if definition.mapsOverLists,
+               let mapped = try broadcastOverLists(id, values, { try self.apply(id, $0) }) {
+                return mapped
+            }
             return try apply(id, values)
         }
     }
@@ -176,8 +196,11 @@ public struct Evaluator: Sendable {
             let value = try real(values, 0)
             return .real(value - value.rounded(.towardZero))
         case .floorInt: return .real((try real(values, 0)).rounded(.down))
-        case .minimum: return .real(Swift.min(try real(values, 0), try real(values, 1)))
-        case .maximum: return .real(Swift.max(try real(values, 0), try real(values, 1)))
+        case .minimum, .maximum:
+            // The list forms are handled by `applyContainerFunction`; this is the two-scalar case.
+            guard values.count == 2 else { throw TIError.dataType }
+            let a = try real(values, 0), b = try real(values, 1)
+            return .real(id == .minimum ? Swift.min(a, b) : Swift.max(a, b))
         case .gcd: return .real(Double(try greatestCommonDivisor(try values[0].asInteger, try values[1].asInteger)))
         case .lcm:
             let a = try values[0].asInteger, b = try values[1].asInteger
@@ -237,14 +260,21 @@ public struct Evaluator: Sendable {
 
         // Presentation-only ids and constants never reach here as calls.
         case .powerOfTen, .powerOfE, .pi, .eulersNumber, .imaginaryUnit, .toFraction, .toDecimal, .toRectangular, .toPolar,
-             .numericIntegral, .numericDerivative, .summation:
-            throw TIError.undefined
+             .numericIntegral, .numericDerivative, .summation,
+             // The list and matrix menus are dispatched by `applyContainerFunction` and
+             // `evaluateContainerCommand`; reaching here means the argument was not a container.
+             .sortAscending, .sortDescending, .dimension, .fill, .sequence,
+             .cumulativeSum, .listDifference, .augment, .listToMatrix, .matrixToList,
+             .listSum, .listProduct, .listMean, .listMedian, .listStandardDeviation, .listVariance,
+             .determinant, .transpose, .identityMatrix, .randomMatrix,
+             .rowEchelon, .reducedRowEchelon, .rowSwap, .rowAdd, .rowScale, .rowScaleAdd:
+            throw TIError.dataType
         }
     }
 
     // MARK: - Functions that bind a variable over an expression
 
-    private func evaluateBinding(_ id: FunctionID, _ arguments: [Expression]) throws -> TIValue {
+    private mutating func evaluateBinding(_ id: FunctionID, _ arguments: [Expression]) throws -> TIValue {
         guard case .variable(let name) = arguments[1] else { throw TIError.syntax }
         let body = arguments[0]
         var local = self

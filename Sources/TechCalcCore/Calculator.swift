@@ -7,26 +7,30 @@ import Foundation
 public struct Calculator: Sendable {
     public var context: EvaluationContext
     public private(set) var history: HistoryLog
-    /// `L1`-`L6` and named lists. Persisted here from M1 so a document written now still opens
-    /// once the list editor lands.
-    public var lists: [String: TIList]
-    /// `[A]`-`[J]`.
-    public var matrices: [String: TIMatrix]
 
     private let random: RandomSource
 
     public init(
         context: EvaluationContext = EvaluationContext(),
         history: HistoryLog = HistoryLog(),
-        lists: [String: TIList] = [:],
-        matrices: [String: TIMatrix] = [:],
         random: RandomSource
     ) {
         self.context = context
         self.history = history
-        self.lists = lists
-        self.matrices = matrices
         self.random = random
+    }
+
+    /// `L1`-`L6` and the named lists. They live in the evaluation context — the evaluator reads
+    /// and writes them during a `STO▸` — and are surfaced here for the list editor.
+    public var lists: [ListName: TIList] {
+        get { context.lists }
+        set { context.lists = newValue }
+    }
+
+    /// `[A]`-`[J]`, likewise owned by the evaluation context.
+    public var matrices: [MatrixName: TIMatrix] {
+        get { context.matrices }
+        set { context.matrices = newValue }
     }
 
     public var mode: CalculatorMode {
@@ -105,6 +109,16 @@ public struct Calculator: Sendable {
         for (name, value) in context.variables {
             variables[String(name)] = value
         }
+        // Container names round-trip through their canonical `key`, so the stored spelling of a
+        // list or matrix is decided in exactly one place.
+        var lists: [String: TIList] = [:]
+        for (name, list) in context.lists {
+            lists[name.key] = list
+        }
+        var matrices: [String: TIMatrix] = [:]
+        for (name, matrix) in context.matrices {
+            matrices[name.key] = matrix
+        }
         return CalculatorDocument(
             mode: context.mode,
             variables: variables,
@@ -123,14 +137,26 @@ public struct Calculator: Sendable {
                   EvaluationContext.isVariableName(character) else { continue }
             variables[character] = value
         }
-        let context = EvaluationContext(mode: document.mode, variables: variables, ans: document.ans)
-        return Calculator(
-            context: context,
-            history: document.history,
-            lists: document.lists,
-            matrices: document.matrices,
-            random: random
+        // A key the current build does not recognise is dropped rather than failing the load:
+        // an older or newer document still opens.
+        var lists: [ListName: TIList] = [:]
+        for (key, list) in document.lists {
+            guard let name = ListName(key: key) else { continue }
+            lists[name] = list
+        }
+        var matrices: [MatrixName: TIMatrix] = [:]
+        for (key, matrix) in document.matrices {
+            guard let name = MatrixName(key: key) else { continue }
+            matrices[name] = matrix
+        }
+        let context = EvaluationContext(
+            mode: document.mode,
+            variables: variables,
+            ans: document.ans,
+            lists: lists,
+            matrices: matrices
         )
+        return Calculator(context: context, history: document.history, random: random)
     }
 
     public func save(to store: DocumentStore) throws {

@@ -134,8 +134,17 @@ public enum KeypadLayout {
         keys.append(KeypadKey(id: "multiply", primary: "*", alpha: "X"))
         keys.append(KeypadKey(id: "divide", primary: "/", alpha: "O"))
         keys.append(KeypadKey(id: "power", primary: "^"))
-        keys.append(KeypadKey(id: "leftParenthesis", primary: "(", alpha: "A"))
-        keys.append(KeypadKey(id: "rightParenthesis", primary: ")", alpha: "B"))
+        // 2nd on the parenthesis keys gives the list braces, as it does on the TI.
+        keys.append(KeypadKey(id: "leftParenthesis", primary: "(",
+                              second: String(ContainerSyntax.listOpen), alpha: "A"))
+        keys.append(KeypadKey(id: "rightParenthesis", primary: ")",
+                              second: String(ContainerSyntax.listClose), alpha: "B"))
+        keys.append(KeypadKey(id: "leftBracket", primary: String(ContainerSyntax.matrixOpen)))
+        keys.append(KeypadKey(id: "rightBracket", primary: String(ContainerSyntax.matrixClose)))
+        // The six numbered lists, whose names are built from `ListName`, not spelled here.
+        for name in ListName.numberedNames {
+            keys.append(KeypadKey(id: name.key, primary: name.key))
+        }
         keys.append(KeypadKey(id: "comma", primary: ",", alpha: "D"))
         keys.append(KeypadKey(id: "store", primary: "→"))
 
