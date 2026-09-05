@@ -59,6 +59,8 @@ public enum Token: Equatable, Sendable {
     case comma
     /// `STO▸`.
     case store
+    /// A `VARS ▸ Statistics` result, e.g. `x̄`, `Sx`, `r²`.
+    case statVariable(StatVariable)
     /// A stored list: `L1`-`L6` or `∟NAME`.
     case listName(ListName)
     /// A stored matrix: `[A]`-`[J]`.

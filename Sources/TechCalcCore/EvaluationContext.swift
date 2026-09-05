@@ -14,19 +14,24 @@ public struct EvaluationContext: Equatable, Sendable {
     public var lists: [ListName: TIList]
     /// `[A]`-`[J]`. A matrix that has never been dimensioned is `ERR:UNDEFINED`.
     public var matrices: [MatrixName: TIMatrix]
+    /// What the last `STAT CALC` or `STAT TESTS` command produced. Reading a variable no command
+    /// has written is `ERR:UNDEFINED`.
+    public var statistics: StatisticsVariables
 
     public init(
         mode: CalculatorMode = .default,
         variables: [Character: Complex] = [:],
         ans: TIValueSnapshot = .real(0),
         lists: [ListName: TIList] = [:],
-        matrices: [MatrixName: TIMatrix] = [:]
+        matrices: [MatrixName: TIMatrix] = [:],
+        statistics: StatisticsVariables = StatisticsVariables()
     ) {
         self.mode = mode
         self.variables = variables
         self.ans = ans
         self.lists = lists
         self.matrices = matrices
+        self.statistics = statistics
     }
 
     /// The TI's variable names: the 26 letters plus theta.

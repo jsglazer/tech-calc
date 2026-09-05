@@ -121,6 +121,38 @@ struct CoreConventionTests {
         }
     }
 
+    @Test("Statistics variable names are declared only in StatVariable.swift")
+    func statisticsNamesLiveInOnePlace() throws {
+        // The same rule the catalog gets: a statistics variable's spelling exists in exactly one
+        // file, and the tokenizer, evaluator and results screens reach it by its case.
+        // The spellings chosen here are never argument labels, so a match is a real second
+        // declaration rather than a UI string that happens to read the same.
+        let spellings = ["\"minX\"", "\"maxX\"", "\"Med\"", "\"Q1\"", "\"Q3\"", "\"sp\""]
+        for spelling in spellings {
+            var filesContaining: [String] = []
+            for url in try Self.coreSourceFiles {
+                if try Self.code(of: url).contains(spelling) {
+                    filesContaining.append(url.lastPathComponent)
+                }
+            }
+            #expect(filesContaining == ["StatVariable.swift"], "\(spelling) appears in \(filesContaining)")
+        }
+    }
+
+    @Test("Every iterative numerical routine carries an explicit step limit")
+    func iterativeRoutinesAreBounded() {
+        // The reviewer criterion asks that the iterative loops have stated limits and tolerances.
+        // Each of these is the single named constant its loop is bounded by.
+        #expect(NumericMethods.maximumIntegrationLevels > 0)
+        #expect(NumericMethods.maximumSummationTerms > 0)
+        #expect(SpecialFunctions.maximumIterations > 0)
+        #expect(SpecialFunctions.convergenceTolerance > 0)
+        #expect(Distributions.maximumInverseIterations > 0)
+        #expect(Distributions.inverseTolerance > 0)
+        #expect(RandomLimits.maximumBernoulliTrials > 0)
+        #expect(MatrixMath.singularityTolerance > 0)
+    }
+
     @Test("The package declares no external dependencies")
     func packageHasNoDependencies() throws {
         let testFile = URL(fileURLWithPath: #filePath)

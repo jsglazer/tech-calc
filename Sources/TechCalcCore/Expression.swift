@@ -42,6 +42,8 @@ public indirect enum Expression: Equatable, Sendable {
     case listLiteral([Expression])
     /// `[[1,2][3,4]]` — a matrix written out, row by row.
     case matrixLiteral([[Expression]])
+    /// A `VARS ▸ Statistics` result produced by the last STAT command, e.g. `x̄` or `r`.
+    case statVariable(StatVariable)
     /// A reference to a stored list, e.g. `L1`.
     case listVariable(ListName)
     /// A reference to a stored matrix, e.g. `[A]`.

@@ -66,17 +66,21 @@ public struct Tokenizer: Sendable {
                 continue
             }
 
+            // The name scan runs before the number scan because several TI command names begin
+            // with a digit — `2-SampTTest`, `1-Var Stats` — and would otherwise lex as a number
+            // followed by nonsense. No name is a bare digit string, so ordinary numbers are
+            // unaffected.
+            if let match = matchesName(characters, at: index) {
+                tokens.append(match.token)
+                index += match.length
+                continue
+            }
+
             if Self.isDigit(character)
                 || (character == "." && index + 1 < characters.count && Self.isDigit(characters[index + 1])) {
                 let (value, length) = try scanNumber(characters, from: index)
                 tokens.append(.number(value))
                 index += length
-                continue
-            }
-
-            if let match = matchesCatalog(characters, at: index), let matched = token(for: match.definition) {
-                tokens.append(matched)
-                index += match.length
                 continue
             }
 
@@ -159,7 +163,35 @@ public struct Tokenizer: Sendable {
         return nil
     }
 
-    private func token(for definition: FunctionDefinition) -> Token? {
+    /// Every name the tokenizer knows: the catalog's function spellings and the statistics
+    /// variables, in one longest-first table.
+    ///
+    /// Merging them is what makes the longest match correct across both: `minX` is the statistics
+    /// variable rather than the `min(` function, `tan(` is the function rather than the `t`
+    /// statistic, and `Sx1` beats `Sx`. Neither table spells a name of its own — this reads them.
+    static let nameIndex: [(spelling: String, token: Token)] = {
+        var pairs: [(String, Token)] = []
+        for entry in FunctionCatalog.spellingIndex {
+            if let token = Self.token(for: entry.definition) {
+                pairs.append((entry.spelling, token))
+            }
+        }
+        for entry in StatVariable.spellingIndex {
+            pairs.append((entry.spelling, .statVariable(entry.variable)))
+        }
+        return pairs.sorted { $0.0.count > $1.0.count }.map { (spelling: $0.0, token: $0.1) }
+    }()
+
+    private func matchesName(_ characters: [Character], at index: Int) -> (token: Token, length: Int)? {
+        for entry in Self.nameIndex {
+            if let length = matchesLiteral(characters, at: index, entry.spelling) {
+                return (entry.token, length)
+            }
+        }
+        return nil
+    }
+
+    private static func token(for definition: FunctionDefinition) -> Token? {
         switch definition.form {
         case .function: .function(definition.id)
         case .infix: .infixFunction(definition.id)
@@ -168,15 +200,6 @@ public struct Tokenizer: Sendable {
         case .displayConversion: .displayConversion(definition.id)
         case .macro: nil
         }
-    }
-
-    private func matchesCatalog(_ characters: [Character], at index: Int) -> (definition: FunctionDefinition, length: Int)? {
-        for entry in FunctionCatalog.spellingIndex {
-            if let length = matchesLiteral(characters, at: index, entry.spelling) {
-                return (entry.definition, length)
-            }
-        }
-        return nil
     }
 
     private func matchesPunctuation(_ characters: [Character], at index: Int) -> (token: Token, length: Int)? {

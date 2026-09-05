@@ -55,6 +55,9 @@ public struct Evaluator: Sendable {
         case .matrixLiteral(let rows):
             return try evaluateMatrixLiteral(rows)
 
+        case .statVariable(let variable):
+            return .real(try context.statistics.value(of: variable))
+
         case .listVariable(let name):
             return .list(context.list(name))
 
@@ -76,11 +79,12 @@ public struct Evaluator: Sendable {
                 values.append(try evaluate(argument))
             }
             if let container = try applyContainerFunction(id, values) { return container }
+            if let command = try applyStatisticsCommand(id, values) { return command }
             if definition.mapsOverLists,
-               let mapped = try broadcastOverLists(id, values, { try self.apply(id, $0) }) {
+               let mapped = try broadcastOverLists(id, values, { try self.applyScalarFunction(id, $0) }) {
                 return mapped
             }
-            return try apply(id, values)
+            return try applyScalarFunction(id, values)
         }
     }
 
@@ -95,6 +99,15 @@ public struct Evaluator: Sendable {
             try local.context.setValue(value, for: name)
         }
         return try local.evaluate(expression)
+    }
+
+    /// The scalar function path: the statistics menu first, then the arithmetic switch.
+    ///
+    /// A direct call and a list broadcast both come through here, so `normalpdf(2)` and
+    /// `normalpdf({1,2})` cannot end up on different code paths.
+    func applyScalarFunction(_ id: FunctionID, _ values: [TIValue]) throws -> TIValue {
+        if let statistics = try applyStatisticsFunction(id, values) { return statistics }
+        return try apply(id, values)
     }
 
     // MARK: - Operators
@@ -267,7 +280,21 @@ public struct Evaluator: Sendable {
              .cumulativeSum, .listDifference, .augment, .listToMatrix, .matrixToList,
              .listSum, .listProduct, .listMean, .listMedian, .listStandardDeviation, .listVariance,
              .determinant, .transpose, .identityMatrix, .randomMatrix,
-             .rowEchelon, .reducedRowEchelon, .rowSwap, .rowAdd, .rowScale, .rowScaleAdd:
+             .rowEchelon, .reducedRowEchelon, .rowSwap, .rowAdd, .rowScale, .rowScaleAdd,
+             // The DISTR menu, the seeded draws and the STAT menus are dispatched by
+             // `applyStatisticsFunction` and `applyStatisticsCommand`; reaching here means the
+             // arguments were not the shape those accept.
+             .normalPDF, .normalCDF, .inverseNormal, .studentPDF, .studentCDF, .inverseStudent,
+             .chiSquarePDF, .chiSquareCDF, .inverseChiSquare, .fPDF, .fCDF, .inverseF,
+             .binomialPDF, .binomialCDF, .poissonPDF, .poissonCDF, .geometricPDF, .geometricCDF,
+             .randomNormal, .randomBinomial, .randomIntegerNoRepeat,
+             .oneVarStats, .twoVarStats,
+             .linRegAXB, .linRegABX, .quadReg, .cubicReg, .quartReg, .lnReg, .expReg, .pwrReg,
+             .zTest, .tTest, .twoSampleZTest, .twoSampleTTest,
+             .onePropZTest, .twoPropZTest, .chiSquareTest, .chiSquareGOFTest,
+             .twoSampleFTest, .linRegTTest,
+             .zInterval, .tInterval, .twoSampleZInterval, .twoSampleTInterval,
+             .onePropZInterval, .twoPropZInterval:
             throw TIError.dataType
         }
     }

@@ -1,0 +1,1189 @@
+{
+  "schema": 1,
+  "generator": "~/.claude/scripts/techcalc-fixtures.R",
+  "reference": "R 4.5.3",
+  "note": "Expected values come from R or from the TI-84 Plus CE guidebook's documented rule evaluated in R. None was produced by running tech-calc.",
+  "cases": [
+    {
+      "id": "normalcdf-left-tail",
+      "group": "distribution",
+      "expression": "normalcdf(-1E99,1.96)",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "expected": 0.97500210485177963
+    },
+    {
+      "id": "normalcdf-display",
+      "group": "distribution",
+      "expression": "normalcdf(-1E99,1.96)",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "expected": 0.97500210485177963,
+      "expectedDisplay": ".9750021049"
+    },
+    {
+      "id": "normalcdf-central",
+      "group": "distribution",
+      "expression": "normalcdf(-1.96,1.96)",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "expected": 0.95000420970355925
+    },
+    {
+      "id": "normalcdf-shifted",
+      "group": "distribution",
+      "expression": "normalcdf(-1E99,115,100,15)",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "expected": 0.84134474606854293
+    },
+    {
+      "id": "normalcdf-right-tail",
+      "group": "distribution",
+      "expression": "normalcdf(100,1E99,100,15)",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "expected": 0.5
+    },
+    {
+      "id": "normalcdf-deep-tail",
+      "group": "distribution",
+      "expression": "normalcdf(-1E99,-5)",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "expected": 2.8665157187919391e-07
+    },
+    {
+      "id": "normalcdf-far-tail",
+      "group": "distribution",
+      "expression": "normalcdf(-1E99,-8)",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "expected": 6.2209605742717849e-16
+    },
+    {
+      "id": "normalpdf-standard",
+      "group": "distribution",
+      "expression": "normalpdf(0)",
+      "provenance": "R 4.5.3 stats::dnorm",
+      "expected": 0.3989422804014327
+    },
+    {
+      "id": "normalpdf-shifted",
+      "group": "distribution",
+      "expression": "normalpdf(1.5,2,3)",
+      "provenance": "R 4.5.3 stats::dnorm",
+      "expected": 0.13114657203397997
+    },
+    {
+      "id": "invnorm-975",
+      "group": "distribution",
+      "expression": "invNorm(.975)",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "expected": 1.9599639845400534
+    },
+    {
+      "id": "invnorm-05",
+      "group": "distribution",
+      "expression": "invNorm(.05)",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "expected": -1.6448536269514722
+    },
+    {
+      "id": "invnorm-shifted",
+      "group": "distribution",
+      "expression": "invNorm(.9,100,15)",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "expected": 119.22327348316901
+    },
+    {
+      "id": "invnorm-extreme",
+      "group": "distribution",
+      "expression": "invNorm(.0001)",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "expected": -3.71901648545568
+    },
+    {
+      "id": "tcdf-left",
+      "group": "distribution",
+      "expression": "tcdf(-1E99,2.228,10)",
+      "provenance": "R 4.5.3 stats::pt",
+      "expected": 0.97499411409144432
+    },
+    {
+      "id": "tcdf-central",
+      "group": "distribution",
+      "expression": "tcdf(-2,2,15)",
+      "provenance": "R 4.5.3 stats::pt",
+      "expected": 0.9360549927152797
+    },
+    {
+      "id": "tcdf-tail",
+      "group": "distribution",
+      "expression": "tcdf(-1E99,-4,3)",
+      "provenance": "R 4.5.3 stats::pt",
+      "expected": 0.014004228005073085
+    },
+    {
+      "id": "tpdf-basic",
+      "group": "distribution",
+      "expression": "tpdf(1.5,10)",
+      "provenance": "R 4.5.3 stats::dt",
+      "expected": 0.1274447942870916
+    },
+    {
+      "id": "invt-975",
+      "group": "distribution",
+      "expression": "invT(.975,10)",
+      "provenance": "R 4.5.3 stats::qt",
+      "expected": 2.2281388519862735
+    },
+    {
+      "id": "invt-99",
+      "group": "distribution",
+      "expression": "invT(.99,25)",
+      "provenance": "R 4.5.3 stats::qt",
+      "expected": 2.4851071754107625
+    },
+    {
+      "id": "invt-low",
+      "group": "distribution",
+      "expression": "invT(.025,7)",
+      "provenance": "R 4.5.3 stats::qt",
+      "expected": -2.3646242515927849
+    },
+    {
+      "id": "chi2cdf-left",
+      "group": "distribution",
+      "expression": "χ²cdf(0,9.488,4)",
+      "provenance": "R 4.5.3 stats::pchisq",
+      "expected": 0.95000559442200538
+    },
+    {
+      "id": "chi2cdf-tail",
+      "group": "distribution",
+      "expression": "χ²cdf(3.84,1E99,1)",
+      "provenance": "R 4.5.3 stats::pchisq",
+      "expected": 0.050043521248705036
+    },
+    {
+      "id": "chi2pdf-basic",
+      "group": "distribution",
+      "expression": "χ²pdf(3,4)",
+      "provenance": "R 4.5.3 stats::dchisq",
+      "expected": 0.1673476201113224
+    },
+    {
+      "id": "invchi2-95",
+      "group": "distribution",
+      "expression": "invχ²(.95,4)",
+      "provenance": "R 4.5.3 stats::qchisq",
+      "expected": 9.487729036781154
+    },
+    {
+      "id": "fcdf-left",
+      "group": "distribution",
+      "expression": "Fcdf(0,3.708,3,10)",
+      "provenance": "R 4.5.3 stats::pf",
+      "expected": 0.94999121839545753
+    },
+    {
+      "id": "fcdf-tail",
+      "group": "distribution",
+      "expression": "Fcdf(2,1E99,5,7)",
+      "provenance": "R 4.5.3 stats::pf",
+      "expected": 0.19567324486682325
+    },
+    {
+      "id": "fpdf-basic",
+      "group": "distribution",
+      "expression": "Fpdf(2,3,10)",
+      "provenance": "R 4.5.3 stats::df",
+      "expected": 0.14821094155911785
+    },
+    {
+      "id": "invf-95",
+      "group": "distribution",
+      "expression": "invF(.95,3,10)",
+      "provenance": "R 4.5.3 stats::qf",
+      "expected": 3.7082648190468444
+    },
+    {
+      "id": "binompdf-basic",
+      "group": "distribution",
+      "expression": "binompdf(10,.5,4)",
+      "provenance": "R 4.5.3 stats::dbinom",
+      "expected": 0.20507812499999997
+    },
+    {
+      "id": "binomcdf-basic",
+      "group": "distribution",
+      "expression": "binomcdf(10,.5,4)",
+      "provenance": "R 4.5.3 stats::pbinom",
+      "expected": 0.37695312500000011
+    },
+    {
+      "id": "binompdf-skewed",
+      "group": "distribution",
+      "expression": "binompdf(20,.3,6)",
+      "provenance": "R 4.5.3 stats::dbinom",
+      "expected": 0.19163898275344257
+    },
+    {
+      "id": "binomcdf-skewed",
+      "group": "distribution",
+      "expression": "binomcdf(20,.3,6)",
+      "provenance": "R 4.5.3 stats::pbinom",
+      "expected": 0.60800981220092409
+    },
+    {
+      "id": "binompdf-large",
+      "group": "distribution",
+      "expression": "binompdf(200,.4,85)",
+      "provenance": "R 4.5.3 stats::dbinom",
+      "expected": 0.043998616191040021
+    },
+    {
+      "id": "poissonpdf-basic",
+      "group": "distribution",
+      "expression": "poissonpdf(3,2)",
+      "provenance": "R 4.5.3 stats::dpois",
+      "expected": 0.22404180765538773
+    },
+    {
+      "id": "poissoncdf-basic",
+      "group": "distribution",
+      "expression": "poissoncdf(3,2)",
+      "provenance": "R 4.5.3 stats::ppois",
+      "expected": 0.42319008112684348
+    },
+    {
+      "id": "poissoncdf-larger",
+      "group": "distribution",
+      "expression": "poissoncdf(7.5,10)",
+      "provenance": "R 4.5.3 stats::ppois",
+      "expected": 0.86223798342838798
+    },
+    {
+      "id": "geometpdf-basic",
+      "group": "distribution",
+      "expression": "geometpdf(.3,4)",
+      "provenance": "R 4.5.3 stats::dgeom (shifted: TI counts trials from 1)",
+      "expected": 0.10290000000000001
+    },
+    {
+      "id": "geometcdf-basic",
+      "group": "distribution",
+      "expression": "geometcdf(.3,4)",
+      "provenance": "R 4.5.3 stats::pgeom (shifted: TI counts trials from 1)",
+      "expected": 0.75989999999999991
+    },
+    {
+      "id": "normalcdf-inverted-bounds",
+      "group": "distribution",
+      "expression": "normalcdf(2,1)",
+      "provenance": "TI-84 Plus CE guidebook (documented rule), evaluated in R - lower > upper is an error, not a negative probability",
+      "expectedError": "ERR:DOMAIN"
+    },
+    {
+      "id": "invnorm-area-one",
+      "group": "distribution",
+      "expression": "invNorm(1)",
+      "provenance": "TI-84 Plus CE guidebook (documented rule), evaluated in R - the inverse is undefined at the endpoints",
+      "expectedError": "ERR:DOMAIN"
+    },
+    {
+      "id": "tcdf-zero-df",
+      "group": "distribution",
+      "expression": "tcdf(-1,1,0)",
+      "provenance": "TI-84 Plus CE guidebook (documented rule), evaluated in R - degrees of freedom must be positive",
+      "expectedError": "ERR:DOMAIN"
+    },
+    {
+      "id": "onevar-n",
+      "group": "one-var",
+      "expression": "n",
+      "provenance": "R 4.5.3 base::length",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 10
+    },
+    {
+      "id": "onevar-mean",
+      "group": "one-var",
+      "expression": "x̄",
+      "provenance": "R 4.5.3 base::mean",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 12.199999999999999
+    },
+    {
+      "id": "onevar-sumx",
+      "group": "one-var",
+      "expression": "Σx",
+      "provenance": "R 4.5.3 base::sum",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 122
+    },
+    {
+      "id": "onevar-sumx2",
+      "group": "one-var",
+      "expression": "Σx²",
+      "provenance": "R 4.5.3 base::sum",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 1978
+    },
+    {
+      "id": "onevar-sx",
+      "group": "one-var",
+      "expression": "Sx",
+      "provenance": "R 4.5.3 stats::sd",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 7.37563556583431
+    },
+    {
+      "id": "onevar-sigmax",
+      "group": "one-var",
+      "expression": "σx",
+      "provenance": "R 4.5.3 base R, population divisor n",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 6.9971422738143607
+    },
+    {
+      "id": "onevar-min",
+      "group": "one-var",
+      "expression": "minX",
+      "provenance": "R 4.5.3 base::min",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 3
+    },
+    {
+      "id": "onevar-max",
+      "group": "one-var",
+      "expression": "maxX",
+      "provenance": "R 4.5.3 base::max",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 25
+    },
+    {
+      "id": "onevar-q1",
+      "group": "one-var",
+      "expression": "Q1",
+      "provenance": "TI-84 Plus CE guidebook (documented rule), evaluated in R",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 7
+    },
+    {
+      "id": "onevar-med",
+      "group": "one-var",
+      "expression": "Med",
+      "provenance": "TI-84 Plus CE guidebook (documented rule), evaluated in R",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 11.5
+    },
+    {
+      "id": "onevar-q3",
+      "group": "one-var",
+      "expression": "Q3",
+      "provenance": "TI-84 Plus CE guidebook (documented rule), evaluated in R",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 19
+    },
+    {
+      "id": "onevar-odd-q1",
+      "group": "one-var",
+      "expression": "Q1",
+      "provenance": "TI-84 Plus CE guidebook (documented rule), evaluated in R - an odd count excludes its own median from both halves",
+      "setup": [
+        "{4,8,15,16,23,42,8}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 8
+    },
+    {
+      "id": "onevar-odd-med",
+      "group": "one-var",
+      "expression": "Med",
+      "provenance": "TI-84 Plus CE guidebook (documented rule), evaluated in R",
+      "setup": [
+        "{4,8,15,16,23,42,8}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 15
+    },
+    {
+      "id": "onevar-odd-q3",
+      "group": "one-var",
+      "expression": "Q3",
+      "provenance": "TI-84 Plus CE guidebook (documented rule), evaluated in R - an odd count excludes its own median from both halves",
+      "setup": [
+        "{4,8,15,16,23,42,8}→L1",
+        "1-Var Stats(L1)"
+      ],
+      "expected": 23
+    },
+    {
+      "id": "twovar-meanx",
+      "group": "two-var",
+      "expression": "x̄",
+      "provenance": "R 4.5.3 base::mean",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "2-Var Stats(L1,L2)"
+      ],
+      "expected": 4.5
+    },
+    {
+      "id": "twovar-meany",
+      "group": "two-var",
+      "expression": "ȳ",
+      "provenance": "R 4.5.3 base::mean",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "2-Var Stats(L1,L2)"
+      ],
+      "expected": 9.0250000000000004
+    },
+    {
+      "id": "twovar-sumxy",
+      "group": "two-var",
+      "expression": "Σxy",
+      "provenance": "R 4.5.3 base::sum",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "2-Var Stats(L1,L2)"
+      ],
+      "expected": 408.80000000000001
+    },
+    {
+      "id": "twovar-sumy2",
+      "group": "two-var",
+      "expression": "Σy²",
+      "provenance": "R 4.5.3 base::sum",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "2-Var Stats(L1,L2)"
+      ],
+      "expected": 819.40000000000009
+    },
+    {
+      "id": "twovar-sy",
+      "group": "two-var",
+      "expression": "Sy",
+      "provenance": "R 4.5.3 stats::sd",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "2-Var Stats(L1,L2)"
+      ],
+      "expected": 4.895989612500653
+    },
+    {
+      "id": "linregaxb-a",
+      "group": "regression",
+      "expression": "a",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegAXB(L1,L2)"
+      ],
+      "expected": 1.9976190476190478
+    },
+    {
+      "id": "linregaxb-b",
+      "group": "regression",
+      "expression": "b",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegAXB(L1,L2)"
+      ],
+      "expected": 0.035714285714285879
+    },
+    {
+      "id": "linregaxb-r",
+      "group": "regression",
+      "expression": "r",
+      "provenance": "R 4.5.3 stats::cor",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegAXB(L1,L2)"
+      ],
+      "expected": 0.99941947479581306
+    },
+    {
+      "id": "linregaxb-r2",
+      "group": "regression",
+      "expression": "r²",
+      "provenance": "R 4.5.3 stats::cor",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegAXB(L1,L2)"
+      ],
+      "expected": 0.99883928660113885
+    },
+    {
+      "id": "linregabx-a",
+      "group": "regression",
+      "expression": "a",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegABX(L1,L2)"
+      ],
+      "expected": 0.035714285714285879
+    },
+    {
+      "id": "linregabx-b",
+      "group": "regression",
+      "expression": "b",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegABX(L1,L2)"
+      ],
+      "expected": 1.9976190476190478
+    },
+    {
+      "id": "quadreg-a",
+      "group": "regression",
+      "expression": "a",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "QuadReg(L1,L2)"
+      ],
+      "expected": 0.0023809523809525551,
+      "tolerance": 1e-08
+    },
+    {
+      "id": "quadreg-b",
+      "group": "regression",
+      "expression": "b",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "QuadReg(L1,L2)"
+      ],
+      "expected": 1.9761904761904749,
+      "tolerance": 1e-08
+    },
+    {
+      "id": "quadreg-c",
+      "group": "regression",
+      "expression": "c",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "QuadReg(L1,L2)"
+      ],
+      "expected": 0.071428571428573701,
+      "tolerance": 1e-08
+    },
+    {
+      "id": "quadreg-r2",
+      "group": "regression",
+      "expression": "r²",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "QuadReg(L1,L2)"
+      ],
+      "expected": 0.99884496246127996,
+      "tolerance": 1e-08
+    },
+    {
+      "id": "cubicreg-a",
+      "group": "regression",
+      "expression": "a",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "CubicReg(L1,L2)"
+      ],
+      "expected": -0.0010101010101009789,
+      "tolerance": 9.9999999999999995e-08
+    },
+    {
+      "id": "cubicreg-d",
+      "group": "regression",
+      "expression": "d",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "CubicReg(L1,L2)"
+      ],
+      "expected": 0.12142857142857268,
+      "tolerance": 9.9999999999999995e-08
+    },
+    {
+      "id": "quartreg-a",
+      "group": "regression",
+      "expression": "a",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "QuartReg(L1,L2)"
+      ],
+      "expected": 0.0030303030303031149,
+      "tolerance": 9.9999999999999995e-07
+    },
+    {
+      "id": "quartreg-b",
+      "group": "regression",
+      "expression": "b",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "QuartReg(L1,L2)"
+      ],
+      "expected": -0.055555555555557114,
+      "tolerance": 9.9999999999999995e-07
+    },
+    {
+      "id": "lnreg-a",
+      "group": "regression",
+      "expression": "a",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LnReg(L1,L2)"
+      ],
+      "expected": 0.19564440610620412
+    },
+    {
+      "id": "lnreg-b",
+      "group": "regression",
+      "expression": "b",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LnReg(L1,L2)"
+      ],
+      "expected": 6.6607722513461489
+    },
+    {
+      "id": "lnreg-r",
+      "group": "regression",
+      "expression": "r",
+      "provenance": "R 4.5.3 stats::cor",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LnReg(L1,L2)"
+      ],
+      "expected": 0.95693675869493222
+    },
+    {
+      "id": "expreg-a",
+      "group": "regression",
+      "expression": "a",
+      "provenance": "R 4.5.3 stats::lm on log y, as the TI fits it",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "ExpReg(L1,L2)"
+      ],
+      "expected": 2.2253901960376057
+    },
+    {
+      "id": "expreg-b",
+      "group": "regression",
+      "expression": "b",
+      "provenance": "R 4.5.3 stats::lm on log y, as the TI fits it",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "ExpReg(L1,L2)"
+      ],
+      "expected": 1.3128636949832311
+    },
+    {
+      "id": "expreg-r",
+      "group": "regression",
+      "expression": "r",
+      "provenance": "R 4.5.3 stats::cor on log y",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "ExpReg(L1,L2)"
+      ],
+      "expected": 0.96159239500612848
+    },
+    {
+      "id": "pwrreg-a",
+      "group": "regression",
+      "expression": "a",
+      "provenance": "R 4.5.3 stats::lm on log-log, as the TI fits it",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "PwrReg(L1,L2)"
+      ],
+      "expected": 2.0522894416879236
+    },
+    {
+      "id": "pwrreg-b",
+      "group": "regression",
+      "expression": "b",
+      "provenance": "R 4.5.3 stats::lm on log-log, as the TI fits it",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "PwrReg(L1,L2)"
+      ],
+      "expected": 0.98517582342686549
+    },
+    {
+      "id": "ttest-t",
+      "group": "test",
+      "expression": "t",
+      "provenance": "R 4.5.3 stats::t.test",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "T-Test(10,L1,0)"
+      ],
+      "expected": 0.94324221828379817
+    },
+    {
+      "id": "ttest-df",
+      "group": "test",
+      "expression": "df",
+      "provenance": "R 4.5.3 stats::t.test",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "T-Test(10,L1,0)"
+      ],
+      "expected": 9
+    },
+    {
+      "id": "ttest-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::t.test",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "T-Test(10,L1,0)"
+      ],
+      "expected": 0.37018683673794273
+    },
+    {
+      "id": "2samptt-welch-t",
+      "group": "test",
+      "expression": "t",
+      "provenance": "R 4.5.3 stats::t.test (Welch)",
+      "setup": [
+        "{22.1,19.8,24.5,21.0,23.3,20.2,25.1,22.8}→L1",
+        "{18.4,20.1,17.9,19.5,21.2,18.8}→L2",
+        "2-SampTTest(L1,L2,0,0)"
+      ],
+      "expected": 3.5916833326621482
+    },
+    {
+      "id": "2samptt-welch-df",
+      "group": "test",
+      "expression": "df",
+      "provenance": "R 4.5.3 stats::t.test (Welch-Satterthwaite)",
+      "setup": [
+        "{22.1,19.8,24.5,21.0,23.3,20.2,25.1,22.8}→L1",
+        "{18.4,20.1,17.9,19.5,21.2,18.8}→L2",
+        "2-SampTTest(L1,L2,0,0)"
+      ],
+      "expected": 11.727733734879687
+    },
+    {
+      "id": "2samptt-welch-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::t.test (Welch)",
+      "setup": [
+        "{22.1,19.8,24.5,21.0,23.3,20.2,25.1,22.8}→L1",
+        "{18.4,20.1,17.9,19.5,21.2,18.8}→L2",
+        "2-SampTTest(L1,L2,0,0)"
+      ],
+      "expected": 0.0038335464770887832
+    },
+    {
+      "id": "2samptt-pooled-t",
+      "group": "test",
+      "expression": "t",
+      "provenance": "R 4.5.3 stats::t.test (pooled)",
+      "setup": [
+        "{22.1,19.8,24.5,21.0,23.3,20.2,25.1,22.8}→L1",
+        "{18.4,20.1,17.9,19.5,21.2,18.8}→L2",
+        "2-SampTTest(L1,L2,0,1)"
+      ],
+      "expected": 3.3561694008734562
+    },
+    {
+      "id": "2samptt-pooled-df",
+      "group": "test",
+      "expression": "df",
+      "provenance": "R 4.5.3 stats::t.test (pooled)",
+      "setup": [
+        "{22.1,19.8,24.5,21.0,23.3,20.2,25.1,22.8}→L1",
+        "{18.4,20.1,17.9,19.5,21.2,18.8}→L2",
+        "2-SampTTest(L1,L2,0,1)"
+      ],
+      "expected": 12
+    },
+    {
+      "id": "2samptt-pooled-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::t.test (pooled)",
+      "setup": [
+        "{22.1,19.8,24.5,21.0,23.3,20.2,25.1,22.8}→L1",
+        "{18.4,20.1,17.9,19.5,21.2,18.8}→L2",
+        "2-SampTTest(L1,L2,0,1)"
+      ],
+      "expected": 0.0057145424241313685
+    },
+    {
+      "id": "ttest-greater-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::t.test (one-sided)",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "T-Test(10,L1,1)"
+      ],
+      "expected": 0.18509341836897136
+    },
+    {
+      "id": "ttest-less-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::t.test (one-sided)",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "T-Test(10,L1,-1)"
+      ],
+      "expected": 0.81490658163102858
+    },
+    {
+      "id": "ztest-z",
+      "group": "test",
+      "expression": "z",
+      "provenance": "R 4.5.3 z formula, evaluated in R",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "Z-Test(10,5,L1,0)"
+      ],
+      "expected": 1.3914021704740867
+    },
+    {
+      "id": "ztest-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "Z-Test(10,5,L1,0)"
+      ],
+      "expected": 0.164103506825787
+    },
+    {
+      "id": "1propztest-z",
+      "group": "test",
+      "expression": "z",
+      "provenance": "R 4.5.3 one-proportion z formula, evaluated in R",
+      "setup": [
+        "1-PropZTest(.5,45,100,0)"
+      ],
+      "expected": -0.99999999999999978
+    },
+    {
+      "id": "1propztest-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "setup": [
+        "1-PropZTest(.5,45,100,0)"
+      ],
+      "expected": 0.31731050786291437
+    },
+    {
+      "id": "2propztest-z",
+      "group": "test",
+      "expression": "z",
+      "provenance": "R 4.5.3 two-proportion z formula, evaluated in R",
+      "setup": [
+        "2-PropZTest(45,100,30,90,0)"
+      ],
+      "expected": 1.6427266128719296
+    },
+    {
+      "id": "2propztest-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::pnorm",
+      "setup": [
+        "2-PropZTest(45,100,30,90,0)"
+      ],
+      "expected": 0.10043950997963536
+    },
+    {
+      "id": "chi2test-stat",
+      "group": "test",
+      "expression": "χ²",
+      "provenance": "R 4.5.3 stats::chisq.test",
+      "setup": [
+        "χ²-Test([[20,30,25][25,15,35]])"
+      ],
+      "expected": 7.2222222222222214
+    },
+    {
+      "id": "chi2test-df",
+      "group": "test",
+      "expression": "df",
+      "provenance": "R 4.5.3 stats::chisq.test",
+      "setup": [
+        "χ²-Test([[20,30,25][25,15,35]])"
+      ],
+      "expected": 2
+    },
+    {
+      "id": "chi2test-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::chisq.test",
+      "setup": [
+        "χ²-Test([[20,30,25][25,15,35]])"
+      ],
+      "expected": 0.027021805951209073
+    },
+    {
+      "id": "chi2gof-stat",
+      "group": "test",
+      "expression": "χ²",
+      "provenance": "R 4.5.3 chi-square statistic, evaluated in R",
+      "setup": [
+        "χ²GOF-Test({30,14,34,45,57,20},{20,20,30,40,60,30},5)"
+      ],
+      "expected": 11.441666666666666
+    },
+    {
+      "id": "chi2gof-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::pchisq",
+      "setup": [
+        "χ²GOF-Test({30,14,34,45,57,20},{20,20,30,40,60,30},5)"
+      ],
+      "expected": 0.043293130315804951
+    },
+    {
+      "id": "2sampftest-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::var.test",
+      "setup": [
+        "{22.1,19.8,24.5,21.0,23.3,20.2,25.1,22.8}→L1",
+        "{18.4,20.1,17.9,19.5,21.2,18.8}→L2",
+        "2-SampFTest(L1,L2,0)"
+      ],
+      "expected": 0.3159854212172144
+    },
+    {
+      "id": "linregttest-t",
+      "group": "test",
+      "expression": "t",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegTTest(L1,L2,0)"
+      ],
+      "expected": 71.855651961598667
+    },
+    {
+      "id": "linregttest-p",
+      "group": "test",
+      "expression": "p",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegTTest(L1,L2,0)"
+      ],
+      "expected": 4.8889336125551193e-10
+    },
+    {
+      "id": "linregttest-df",
+      "group": "test",
+      "expression": "df",
+      "provenance": "R 4.5.3 stats::lm residual degrees of freedom",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegTTest(L1,L2,0)"
+      ],
+      "expected": 6
+    },
+    {
+      "id": "linregttest-s",
+      "group": "test",
+      "expression": "s",
+      "provenance": "R 4.5.3 stats::lm residual standard error",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegTTest(L1,L2,0)"
+      ],
+      "expected": 0.18016747059421553
+    },
+    {
+      "id": "tinterval-lower",
+      "group": "interval",
+      "expression": "lower",
+      "provenance": "R 4.5.3 stats::t.test",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "TInterval(L1,.95)"
+      ],
+      "expected": 6.9237881620575745
+    },
+    {
+      "id": "tinterval-upper",
+      "group": "interval",
+      "expression": "upper",
+      "provenance": "R 4.5.3 stats::t.test",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "TInterval(L1,.95)"
+      ],
+      "expected": 17.476211837942422
+    },
+    {
+      "id": "zinterval-lower",
+      "group": "interval",
+      "expression": "lower",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "ZInterval(5,L1,.95)"
+      ],
+      "expected": 9.1010248384771923
+    },
+    {
+      "id": "zinterval-upper",
+      "group": "interval",
+      "expression": "upper",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "setup": [
+        "{12,7,3,19,25,8,14,3,11,20}→L1",
+        "ZInterval(5,L1,.95)"
+      ],
+      "expected": 15.298975161522806
+    },
+    {
+      "id": "2samptint-lower",
+      "group": "interval",
+      "expression": "lower",
+      "provenance": "R 4.5.3 stats::t.test (Welch)",
+      "setup": [
+        "{22.1,19.8,24.5,21.0,23.3,20.2,25.1,22.8}→L1",
+        "{18.4,20.1,17.9,19.5,21.2,18.8}→L2",
+        "2-SampTInt(L1,L2,.95,0)"
+      ],
+      "expected": 1.1884816800023337
+    },
+    {
+      "id": "2samptint-upper",
+      "group": "interval",
+      "expression": "upper",
+      "provenance": "R 4.5.3 stats::t.test (Welch)",
+      "setup": [
+        "{22.1,19.8,24.5,21.0,23.3,20.2,25.1,22.8}→L1",
+        "{18.4,20.1,17.9,19.5,21.2,18.8}→L2",
+        "2-SampTInt(L1,L2,.95,0)"
+      ],
+      "expected": 4.878184986664337
+    },
+    {
+      "id": "1propzint-lower",
+      "group": "interval",
+      "expression": "lower",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "setup": [
+        "1-PropZInt(45,100,.95)"
+      ],
+      "expected": 0.35249302291006068
+    },
+    {
+      "id": "1propzint-upper",
+      "group": "interval",
+      "expression": "upper",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "setup": [
+        "1-PropZInt(45,100,.95)"
+      ],
+      "expected": 0.54750697708993934
+    },
+    {
+      "id": "2propzint-lower",
+      "group": "interval",
+      "expression": "lower",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "setup": [
+        "2-PropZInt(45,100,30,90,.95)"
+      ],
+      "expected": -0.021147316981962649
+    },
+    {
+      "id": "2propzint-upper",
+      "group": "interval",
+      "expression": "upper",
+      "provenance": "R 4.5.3 stats::qnorm",
+      "setup": [
+        "2-PropZInt(45,100,30,90,.95)"
+      ],
+      "expected": 0.25448065031529604
+    }
+  ]
+}

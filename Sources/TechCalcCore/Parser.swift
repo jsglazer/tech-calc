@@ -286,6 +286,10 @@ private struct ParserState {
             advance()
             return .call(id, try parseArguments(for: id))
 
+        case .statVariable(let variable):
+            advance()
+            return .statVariable(variable)
+
         case .listName(let name):
             advance()
             return .listVariable(name)
@@ -356,6 +360,7 @@ private struct ParserState {
     private func startsOperand(_ token: Token) -> Bool {
         switch token {
         case .number, .variable, .ans, .constant, .function, .leftParenthesis: true
+        case .statVariable: true
         case .listName, .matrixName, .leftBrace, .leftBracket: true
         default: false
         }

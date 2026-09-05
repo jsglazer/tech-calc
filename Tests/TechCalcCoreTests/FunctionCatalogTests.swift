@@ -51,11 +51,69 @@ struct FunctionCatalogTests {
         .rowSwap: [matrix, "1", "2"],
         .rowAdd: [matrix, "1", "2"],
         .rowScale: ["2", matrix, "1"],
-        .rowScaleAdd: ["2", matrix, "1", "2"]
+        .rowScaleAdd: ["2", matrix, "1", "2"],
+
+        // The DISTR menu. Areas are probabilities and degrees of freedom are positive, so these
+        // entries need real arguments rather than the default 2s.
+        .normalCDF: ["-1E99", "1.96"],
+        .inverseNormal: [".975"],
+        .studentPDF: ["1.5", "10"],
+        .studentCDF: ["-1E99", "2.228", "10"],
+        .inverseStudent: [".975", "10"],
+        .chiSquarePDF: ["3", "4"],
+        .chiSquareCDF: ["0", "9.488", "4"],
+        .inverseChiSquare: [".95", "4"],
+        .fPDF: ["2", "3", "10"],
+        .fCDF: ["0", "3.708", "3", "10"],
+        .inverseF: [".95", "3", "10"],
+        .binomialPDF: ["10", ".5", "4"],
+        .binomialCDF: ["10", ".5", "4"],
+        .poissonPDF: ["3", "2"],
+        .poissonCDF: ["3", "2"],
+        .geometricPDF: [".3", "4"],
+        .geometricCDF: [".3", "4"],
+        .randomNormal: ["0", "1"],
+        .randomBinomial: ["10", ".5"],
+        .randomIntegerNoRepeat: ["1", "5"],
+
+        // STAT CALC. Six points with distinct x values keep even the quartic fit non-singular,
+        // and both lists are strictly positive so the logarithmic, exponential and power fits
+        // are in domain.
+        .oneVarStats: [sampleY],
+        .twoVarStats: [sampleX, sampleY],
+        .linRegAXB: [sampleX, sampleY],
+        .linRegABX: [sampleX, sampleY],
+        .quadReg: [sampleX, sampleY],
+        .cubicReg: [sampleX, sampleY],
+        .quartReg: [sampleX, sampleY],
+        .lnReg: [sampleX, sampleY],
+        .expReg: [sampleX, sampleY],
+        .pwrReg: [sampleX, sampleY],
+
+        // STAT TESTS, exercised in the TI's Data form where one exists.
+        .zTest: ["4", "2", sampleY, "0"],
+        .tTest: ["4", sampleY, "0"],
+        .twoSampleZTest: ["2", "2", sampleX, sampleY, "0"],
+        .twoSampleTTest: [sampleX, sampleY, "0", "0"],
+        .onePropZTest: [".5", "40", "100", "0"],
+        .twoPropZTest: ["40", "100", "30", "100", "0"],
+        .chiSquareTest: ["[[10,20][20,10]]"],
+        .chiSquareGOFTest: ["{10,20,30}", "{15,20,25}", "2"],
+        .twoSampleFTest: [sampleX, sampleY, "0"],
+        .linRegTTest: [sampleX, sampleY, "0"],
+        .zInterval: ["2", sampleY, ".95"],
+        .tInterval: [sampleY, ".95"],
+        .twoSampleZInterval: ["2", "2", sampleX, sampleY, ".95"],
+        .twoSampleTInterval: [sampleX, sampleY, ".95", "0"],
+        .onePropZInterval: ["40", "100", ".95"],
+        .twoPropZInterval: ["40", "100", "30", "100", ".95"]
     ]
 
     private static let list = "{1,2,3}"
     private static let matrix = "[[1,2][3,4]]"
+    /// A well-conditioned paired sample: distinct, positive x values, positive y values.
+    private static let sampleX = "{1,2,3,4,5,6}"
+    private static let sampleY = "{2,4,5,4,5,7}"
 
 
     private static func arguments(for definition: FunctionDefinition) -> [String] {

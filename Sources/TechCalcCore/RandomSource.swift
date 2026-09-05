@@ -21,6 +21,51 @@ extension RandomSource {
         let offset = Int((nextUniform() * span).rounded(.down))
         return lower + Swift.min(offset, upper - lower)
     }
+
+    /// A standard normal variate by the Box-Muller transform — `randNorm(`.
+    ///
+    /// One uniform pair yields one variate rather than the two the transform can produce: caching
+    /// the second would make a draw depend on how many draws preceded it, and the sequence has to
+    /// be a function of the seed alone.
+    public func nextNormal() -> Double {
+        var uniform = nextUniform()
+        // The transform needs a strictly positive argument for the logarithm.
+        if uniform <= 0 { uniform = Double.leastNormalMagnitude }
+        let radius = (-2 * Foundation.log(uniform)).squareRoot()
+        return radius * Foundation.cos(2 * Double.pi * nextUniform())
+    }
+
+    /// The number of successes in `trials` Bernoulli trials — `randBin(`.
+    ///
+    /// Counted trial by trial, with an explicit cap, so the draw cannot spin on a mistyped count.
+    public func nextBinomial(trials: Int, probability: Double) throws -> Int {
+        guard trials >= 0, trials <= RandomLimits.maximumBernoulliTrials,
+              probability >= 0, probability <= 1 else { throw TIError.domain }
+        var successes = 0
+        for _ in 0..<trials where nextUniform() < probability {
+            successes += 1
+        }
+        return successes
+    }
+
+    /// A random permutation of `lower...upper` — `randIntNoRep(`.
+    public func nextPermutation(lower: Int, upper: Int) throws -> [Int] {
+        guard lower <= upper else { throw TIError.domain }
+        let count = upper - lower + 1
+        guard count <= TILimits.maxListLength else { throw TIError.invalidDimension }
+        var values = Array(lower...upper)
+        // Fisher-Yates, drawing through the injected source so the shuffle is seed-reproducible.
+        for index in stride(from: values.count - 1, to: 0, by: -1) {
+            let pick = try nextInteger(lower: 0, upper: index)
+            values.swapAt(index, pick)
+        }
+        return values
+    }
+}
+
+/// Bounds on the loops the seeded draws run, so no draw is unbounded.
+public enum RandomLimits {
+    public static let maximumBernoulliTrials = 1_000_000
 }
 
 /// A deterministic, seedable generator: SplitMix64, chosen because its state advance is a

@@ -35,6 +35,24 @@ public enum FunctionID: String, Equatable, Hashable, Sendable, CaseIterable, Cod
     case rowEchelon, reducedRowEchelon, rowSwap, rowAdd, rowScale, rowScaleAdd
     // Display conversions
     case toFraction, toDecimal, toRectangular, toPolar
+    // DISTR — continuous
+    case normalPDF, normalCDF, inverseNormal
+    case studentPDF, studentCDF, inverseStudent
+    case chiSquarePDF, chiSquareCDF, inverseChiSquare
+    case fPDF, fCDF, inverseF
+    // DISTR — discrete
+    case binomialPDF, binomialCDF, poissonPDF, poissonCDF, geometricPDF, geometricCDF
+    // PROB — the seeded draws that follow a distribution
+    case randomNormal, randomBinomial, randomIntegerNoRepeat
+    // STAT CALC
+    case oneVarStats, twoVarStats
+    case linRegAXB, linRegABX, quadReg, cubicReg, quartReg, lnReg, expReg, pwrReg
+    // STAT TESTS — hypothesis tests
+    case zTest, tTest, twoSampleZTest, twoSampleTTest
+    case onePropZTest, twoPropZTest, chiSquareTest, chiSquareGOFTest, twoSampleFTest, linRegTTest
+    // STAT TESTS — confidence intervals
+    case zInterval, tInterval, twoSampleZInterval, twoSampleTInterval
+    case onePropZInterval, twoPropZInterval
 }
 
 /// How an entry is written in an expression.
@@ -64,6 +82,10 @@ public struct FunctionDefinition: Equatable, Sendable {
     public let aliases: [String]
     /// Where the TI keypad menus put it, e.g. `MATH NUM`.
     public let menuPath: String
+    /// How the TI's own menu spells it, when that differs from the callable `name`. The TI writes
+    /// its two linear regressions as `LinReg(ax+b)` and `LinReg(a+bx)`, which are menu labels
+    /// rather than call syntax; the menus show this and the entry line takes `name`.
+    public let menuLabel: String
     public let form: FunctionForm
     /// Accepted argument counts. A range wider than one point means optional arguments.
     public let arity: ClosedRange<Int>
@@ -84,6 +106,7 @@ public struct FunctionDefinition: Equatable, Sendable {
         name: String,
         aliases: [String] = [],
         menuPath: String,
+        menuLabel: String? = nil,
         form: FunctionForm = .function,
         arity: ClosedRange<Int>,
         argumentLabels: [String] = [],
@@ -95,6 +118,7 @@ public struct FunctionDefinition: Equatable, Sendable {
         self.name = name
         self.aliases = aliases
         self.menuPath = menuPath
+        self.menuLabel = menuLabel ?? name
         self.form = form
         self.arity = arity
         self.argumentLabels = argumentLabels
@@ -258,7 +282,129 @@ public enum FunctionCatalog {
         FunctionDefinition(id: .toFraction, name: "▸Frac", menuPath: "MATH MATH", form: .displayConversion, arity: 1...1, argumentLabels: ["value"]),
         FunctionDefinition(id: .toDecimal, name: "▸Dec", menuPath: "MATH MATH", form: .displayConversion, arity: 1...1, argumentLabels: ["value"]),
         FunctionDefinition(id: .toRectangular, name: "▸Rect", menuPath: "MATH CMPLX", form: .displayConversion, arity: 1...1, argumentLabels: ["value"]),
-        FunctionDefinition(id: .toPolar, name: "▸Polar", menuPath: "MATH CMPLX", form: .displayConversion, arity: 1...1, argumentLabels: ["value"])
+        FunctionDefinition(id: .toPolar, name: "▸Polar", menuPath: "MATH CMPLX", form: .displayConversion, arity: 1...1, argumentLabels: ["value"]),
+
+        // MARK: 2ND DISTR — continuous. A `cdf` integrates lower to upper, left to right, and
+        // treats a magnitude of 1E99 as infinity; `lower > upper` is ERR:DOMAIN.
+        FunctionDefinition(id: .normalPDF, name: "normalpdf", menuPath: "2ND DISTR", arity: 1...3,
+                           argumentLabels: ["x", "\u{03BC}", "\u{03C3}"]),
+        FunctionDefinition(id: .normalCDF, name: "normalcdf", menuPath: "2ND DISTR", arity: 2...4,
+                           argumentLabels: ["lower", "upper", "\u{03BC}", "\u{03C3}"]),
+        FunctionDefinition(id: .inverseNormal, name: "invNorm", menuPath: "2ND DISTR", arity: 1...3,
+                           argumentLabels: ["area", "\u{03BC}", "\u{03C3}"]),
+        FunctionDefinition(id: .studentPDF, name: "tpdf", menuPath: "2ND DISTR", arity: 2...2,
+                           argumentLabels: ["x", "df"]),
+        FunctionDefinition(id: .studentCDF, name: "tcdf", menuPath: "2ND DISTR", arity: 3...3,
+                           argumentLabels: ["lower", "upper", "df"]),
+        FunctionDefinition(id: .inverseStudent, name: "invT", menuPath: "2ND DISTR", arity: 2...2,
+                           argumentLabels: ["area", "df"]),
+        FunctionDefinition(id: .chiSquarePDF, name: "\u{03C7}\u{00B2}pdf", aliases: ["chi2pdf"], menuPath: "2ND DISTR",
+                           arity: 2...2, argumentLabels: ["x", "df"]),
+        FunctionDefinition(id: .chiSquareCDF, name: "\u{03C7}\u{00B2}cdf", aliases: ["chi2cdf"], menuPath: "2ND DISTR",
+                           arity: 3...3, argumentLabels: ["lower", "upper", "df"]),
+        FunctionDefinition(id: .inverseChiSquare, name: "inv\u{03C7}\u{00B2}", aliases: ["invChi2"], menuPath: "2ND DISTR",
+                           arity: 2...2, argumentLabels: ["area", "df"]),
+        FunctionDefinition(id: .fPDF, name: "Fpdf", menuPath: "2ND DISTR", arity: 3...3,
+                           argumentLabels: ["x", "df1", "df2"]),
+        FunctionDefinition(id: .fCDF, name: "Fcdf", menuPath: "2ND DISTR", arity: 4...4,
+                           argumentLabels: ["lower", "upper", "df1", "df2"]),
+        FunctionDefinition(id: .inverseF, name: "invF", menuPath: "2ND DISTR", arity: 3...3,
+                           argumentLabels: ["area", "df1", "df2"]),
+
+        // MARK: 2ND DISTR — discrete. Omitting the count from `binompdf(`/`binomcdf(` returns the
+        // whole list over 0...n, as on the TI.
+        FunctionDefinition(id: .binomialPDF, name: "binompdf", menuPath: "2ND DISTR", arity: 2...3,
+                           argumentLabels: ["trials", "p", "x"]),
+        FunctionDefinition(id: .binomialCDF, name: "binomcdf", menuPath: "2ND DISTR", arity: 2...3,
+                           argumentLabels: ["trials", "p", "x"]),
+        FunctionDefinition(id: .poissonPDF, name: "poissonpdf", menuPath: "2ND DISTR", arity: 2...2,
+                           argumentLabels: ["\u{03BC}", "x"]),
+        FunctionDefinition(id: .poissonCDF, name: "poissoncdf", menuPath: "2ND DISTR", arity: 2...2,
+                           argumentLabels: ["\u{03BC}", "x"]),
+        FunctionDefinition(id: .geometricPDF, name: "geometpdf", menuPath: "2ND DISTR", arity: 2...2,
+                           argumentLabels: ["p", "trial"]),
+        FunctionDefinition(id: .geometricCDF, name: "geometcdf", menuPath: "2ND DISTR", arity: 2...2,
+                           argumentLabels: ["p", "trial"]),
+
+        // MARK: MATH PROB — the remaining seeded draws. Every one flows through RandomSource.
+        FunctionDefinition(id: .randomNormal, name: "randNorm", menuPath: "MATH PROB", arity: 2...3,
+                           argumentLabels: ["\u{03BC}", "\u{03C3}", "count"], mapsOverLists: false),
+        FunctionDefinition(id: .randomBinomial, name: "randBin", menuPath: "MATH PROB", arity: 2...3,
+                           argumentLabels: ["trials", "p", "count"], mapsOverLists: false),
+        FunctionDefinition(id: .randomIntegerNoRepeat, name: "randIntNoRep", menuPath: "MATH PROB", arity: 2...2,
+                           argumentLabels: ["lower", "upper"], mapsOverLists: false),
+
+        // MARK: STAT CALC — every entry consumes whole lists, so none of them broadcasts.
+        FunctionDefinition(id: .oneVarStats, name: "1-Var Stats", aliases: ["1-VarStats"], menuPath: "STAT CALC",
+                           arity: 1...2, argumentLabels: ["list", "freq"], mapsOverLists: false),
+        FunctionDefinition(id: .twoVarStats, name: "2-Var Stats", aliases: ["2-VarStats"], menuPath: "STAT CALC",
+                           arity: 2...3, argumentLabels: ["listX", "listY", "freq"], mapsOverLists: false),
+        FunctionDefinition(id: .linRegAXB, name: "LinRegAXB", menuPath: "STAT CALC", menuLabel: "LinReg(ax+b)",
+                           arity: 2...3, argumentLabels: ["listX", "listY", "freq"], mapsOverLists: false),
+        FunctionDefinition(id: .linRegABX, name: "LinRegABX", menuPath: "STAT CALC", menuLabel: "LinReg(a+bx)",
+                           arity: 2...3, argumentLabels: ["listX", "listY", "freq"], mapsOverLists: false),
+        FunctionDefinition(id: .quadReg, name: "QuadReg", menuPath: "STAT CALC", arity: 2...3,
+                           argumentLabels: ["listX", "listY", "freq"], mapsOverLists: false),
+        FunctionDefinition(id: .cubicReg, name: "CubicReg", menuPath: "STAT CALC", arity: 2...3,
+                           argumentLabels: ["listX", "listY", "freq"], mapsOverLists: false),
+        FunctionDefinition(id: .quartReg, name: "QuartReg", menuPath: "STAT CALC", arity: 2...3,
+                           argumentLabels: ["listX", "listY", "freq"], mapsOverLists: false),
+        FunctionDefinition(id: .lnReg, name: "LnReg", menuPath: "STAT CALC", arity: 2...3,
+                           argumentLabels: ["listX", "listY", "freq"], mapsOverLists: false),
+        FunctionDefinition(id: .expReg, name: "ExpReg", menuPath: "STAT CALC", arity: 2...3,
+                           argumentLabels: ["listX", "listY", "freq"], mapsOverLists: false),
+        FunctionDefinition(id: .pwrReg, name: "PwrReg", menuPath: "STAT CALC", arity: 2...3,
+                           argumentLabels: ["listX", "listY", "freq"], mapsOverLists: false),
+
+        // MARK: STAT TESTS — hypothesis tests. Each accepts the TI's Data form (a list) and its
+        // Stats form (summary numbers); which one was written is decided by the argument's type.
+        // `alternative` is the TI's code: 0 for two-sided, -1 for <, 1 for >.
+        FunctionDefinition(id: .zTest, name: "Z-Test", menuPath: "STAT TESTS", arity: 4...5,
+                           argumentLabels: ["\u{03BC}0", "\u{03C3}", "list or x\u{0304}", "n", "alternative"],
+                           mapsOverLists: false),
+        FunctionDefinition(id: .tTest, name: "T-Test", menuPath: "STAT TESTS", arity: 3...5,
+                           argumentLabels: ["\u{03BC}0", "list or x\u{0304}", "Sx", "n", "alternative"],
+                           mapsOverLists: false),
+        FunctionDefinition(id: .twoSampleZTest, name: "2-SampZTest", menuPath: "STAT TESTS", arity: 5...7,
+                           argumentLabels: ["\u{03C3}1", "\u{03C3}2", "list1 or x\u{0304}1", "list2 or n1",
+                                            "x\u{0304}2", "n2", "alternative"],
+                           mapsOverLists: false),
+        FunctionDefinition(id: .twoSampleTTest, name: "2-SampTTest", menuPath: "STAT TESTS", arity: 4...8,
+                           argumentLabels: ["list1 or x\u{0304}1", "list2 or Sx1", "n1", "x\u{0304}2", "Sx2", "n2",
+                                            "alternative", "pooled"],
+                           mapsOverLists: false),
+        FunctionDefinition(id: .onePropZTest, name: "1-PropZTest", menuPath: "STAT TESTS", arity: 4...4,
+                           argumentLabels: ["p0", "x", "n", "alternative"], mapsOverLists: false),
+        FunctionDefinition(id: .twoPropZTest, name: "2-PropZTest", menuPath: "STAT TESTS", arity: 5...5,
+                           argumentLabels: ["x1", "n1", "x2", "n2", "alternative"], mapsOverLists: false),
+        FunctionDefinition(id: .chiSquareTest, name: "\u{03C7}\u{00B2}-Test", aliases: ["chi2-Test"],
+                           menuPath: "STAT TESTS", arity: 1...1, argumentLabels: ["observed"], mapsOverLists: false),
+        FunctionDefinition(id: .chiSquareGOFTest, name: "\u{03C7}\u{00B2}GOF-Test", aliases: ["chi2GOF-Test"],
+                           menuPath: "STAT TESTS", arity: 3...3, argumentLabels: ["observed", "expected", "df"],
+                           mapsOverLists: false),
+        FunctionDefinition(id: .twoSampleFTest, name: "2-SampFTest", menuPath: "STAT TESTS", arity: 3...5,
+                           argumentLabels: ["list1 or Sx1", "list2 or n1", "Sx2", "n2", "alternative"],
+                           mapsOverLists: false),
+        FunctionDefinition(id: .linRegTTest, name: "LinRegTTest", menuPath: "STAT TESTS", arity: 3...3,
+                           argumentLabels: ["listX", "listY", "alternative"], mapsOverLists: false),
+
+        // MARK: STAT TESTS — confidence intervals. The level is a proportion (0.95), as on the TI.
+        FunctionDefinition(id: .zInterval, name: "ZInterval", menuPath: "STAT TESTS", arity: 3...4,
+                           argumentLabels: ["\u{03C3}", "list or x\u{0304}", "n", "level"], mapsOverLists: false),
+        FunctionDefinition(id: .tInterval, name: "TInterval", menuPath: "STAT TESTS", arity: 2...4,
+                           argumentLabels: ["list or x\u{0304}", "Sx", "n", "level"], mapsOverLists: false),
+        FunctionDefinition(id: .twoSampleZInterval, name: "2-SampZInt", menuPath: "STAT TESTS", arity: 5...7,
+                           argumentLabels: ["\u{03C3}1", "\u{03C3}2", "list1 or x\u{0304}1", "list2 or n1",
+                                            "x\u{0304}2", "n2", "level"],
+                           mapsOverLists: false),
+        FunctionDefinition(id: .twoSampleTInterval, name: "2-SampTInt", menuPath: "STAT TESTS", arity: 4...8,
+                           argumentLabels: ["list1 or x\u{0304}1", "list2 or Sx1", "n1", "x\u{0304}2", "Sx2", "n2",
+                                            "level", "pooled"],
+                           mapsOverLists: false),
+        FunctionDefinition(id: .onePropZInterval, name: "1-PropZInt", menuPath: "STAT TESTS", arity: 3...3,
+                           argumentLabels: ["x", "n", "level"], mapsOverLists: false),
+        FunctionDefinition(id: .twoPropZInterval, name: "2-PropZInt", menuPath: "STAT TESTS", arity: 5...5,
+                           argumentLabels: ["x1", "n1", "x2", "n2", "level"], mapsOverLists: false)
     ]
 
     /// Every tokenizable spelling mapped to its definition, longest names first so the
