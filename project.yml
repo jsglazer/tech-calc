@@ -74,3 +74,17 @@ targets:
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         CODE_SIGN_STYLE: Automatic
+
+schemes:
+  # The deploy script (~/Dev/0-Process/MakeDMG.sh) archives the scheme whose name matches the
+  # .xcodeproj, falling back to the first alphabetically — which is the TechCalcCore library, and
+  # an archived library has no .app to export. This scheme is that name, pointed at the shipping
+  # macOS app.
+  TechCalc:
+    build:
+      targets:
+        TechCalcMac: all
+    run:
+      config: Debug
+    archive:
+      config: Release
