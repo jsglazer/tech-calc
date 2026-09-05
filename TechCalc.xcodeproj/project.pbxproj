@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F6F73AA053502F27030F43A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02BDBEE8750BD36710D68C5D /* Assets.xcassets */; };
 		434D63FAF4D6FA9652E35D4E /* TechCalcUI in Frameworks */ = {isa = PBXBuildFile; productRef = F2927B021EA404D4B778F68A /* TechCalcUI */; };
 		4476F4CBD0073166CF752531 /* TechCalcUI in Frameworks */ = {isa = PBXBuildFile; productRef = 86C553E45D11AC9574530254 /* TechCalcUI */; };
+		580D12E98B024DBBBB43F2D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4657850D4415BAA34F9FCD7 /* Assets.xcassets */; };
 		5DD14B8E31DF485E1DE82BAD /* TechCalcMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7648E22942B5D1529379895 /* TechCalcMacApp.swift */; };
 		9828997EF13AEEE5D37A964E /* TechCalcIOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA220B52EF2EB9AFD165FA9F /* TechCalcIOSApp.swift */; };
 		BE5D3D4682AF53806D292AF2 /* TechCalcCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0B8560644DEA664C8B7428EA /* TechCalcCore */; };
@@ -16,9 +18,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		02BDBEE8750BD36710D68C5D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9674A2737FB591947E546A10 /* TechCalcMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TechCalcMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B7648E22942B5D1529379895 /* TechCalcMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechCalcMacApp.swift; sourceTree = "<group>"; };
 		D3E7A78457AF0B06987E0D5E /* TechCalcIOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TechCalcIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4657850D4415BAA34F9FCD7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EDFC5EF9B55032E806B327EF /* tech-calc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "tech-calc"; path = .; sourceTree = SOURCE_ROOT; };
 		FA220B52EF2EB9AFD165FA9F /* TechCalcIOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TechCalcIOSApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -56,6 +60,7 @@
 		8879480929B57781EFF185B8 /* TechCalcIOS */ = {
 			isa = PBXGroup;
 			children = (
+				D4657850D4415BAA34F9FCD7 /* Assets.xcassets */,
 				FA220B52EF2EB9AFD165FA9F /* TechCalcIOSApp.swift */,
 			);
 			path = TechCalcIOS;
@@ -64,6 +69,7 @@
 		B6B88B615E90D720DA6BA9D2 /* TechCalcMac */ = {
 			isa = PBXGroup;
 			children = (
+				02BDBEE8750BD36710D68C5D /* Assets.xcassets */,
 				B7648E22942B5D1529379895 /* TechCalcMacApp.swift */,
 			);
 			path = TechCalcMac;
@@ -104,6 +110,7 @@
 			buildConfigurationList = 038D546660571A2B1C388DD1 /* Build configuration list for PBXNativeTarget "TechCalcMac" */;
 			buildPhases = (
 				B8F1084EBE41FB4AB295AD69 /* Sources */,
+				D3D352E37BE57779D8E3F3BE /* Resources */,
 				FD3A811051887AD50DA44AAF /* Frameworks */,
 			);
 			buildRules = (
@@ -124,6 +131,7 @@
 			buildConfigurationList = 16926ECB3579B3F3C5F492B3 /* Build configuration list for PBXNativeTarget "TechCalcIOS" */;
 			buildPhases = (
 				B4B9273462D001336FF3A18F /* Sources */,
+				8CB7DA4C112EB8A6212354A7 /* Resources */,
 				27A000873A10345DB54BFAEE /* Frameworks */,
 			);
 			buildRules = (
@@ -180,6 +188,25 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8CB7DA4C112EB8A6212354A7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				580D12E98B024DBBBB43F2D4 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D3D352E37BE57779D8E3F3BE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2F6F73AA053502F27030F43A /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B4B9273462D001336FF3A18F /* Sources */ = {
@@ -296,7 +323,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -362,7 +389,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

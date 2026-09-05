@@ -167,6 +167,12 @@ public struct ModeScreen: View {
                     ForEach(ComplexMode.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                 }
             }
+            Section("Theme") {
+                Picker("Theme", selection: $model.theme) {
+                    ForEach(AppTheme.allCases) { Text($0.displayName).tag($0) }
+                }
+                .pickerStyle(.segmented)
+            }
             Section("Answers") {
                 Picker("Answers", selection: binding(\.answer)) {
                     ForEach(AnswerMode.allCases, id: \.self) { Text($0.rawValue).tag($0) }

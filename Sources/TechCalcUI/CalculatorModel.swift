@@ -18,6 +18,21 @@ public final class CalculatorModel {
     public private(set) var keypad = KeypadState()
     /// Cursor into `2ND ENTRY` recall; -1 means "not recalling".
     private var recallIndex = -1
+    /// Which screen is showing. The keypad's menu keys move it, so it lives with the rest of the
+    /// state the keypad drives rather than in the view.
+    public var screen: Screen = .calculator
+    /// The last face pressed that this build has no feature for, for the status line to name.
+    public private(set) var unavailableKeyLabel: String?
+
+    private static let themeDefaultsKey = "TechCalc.theme"
+
+    /// The chosen skin. It is a display preference rather than a calculator MODE setting, so it
+    /// is stored beside the document rather than inside it — the saved calculator stays portable.
+    public var theme: AppTheme = AppTheme(
+        rawValue: UserDefaults.standard.string(forKey: CalculatorModel.themeDefaultsKey) ?? ""
+    ) ?? .system {
+        didSet { UserDefaults.standard.set(theme.rawValue, forKey: Self.themeDefaultsKey) }
+    }
 
     /// The `STAT TESTS` screen's state: which form is open, what has been typed into it, and what
     /// the last run produced. The values and the result are TechCalcCore types — the screen keeps
@@ -65,12 +80,50 @@ public final class CalculatorModel {
         buffer.replace(with: text)
     }
 
+    /// One key press. `KeypadState` resolves which of the key's three printed faces applies, and
+    /// this is the only place a face's effect turns into an action — the views press keys and
+    /// nothing else.
     public func press(_ key: KeypadKey) {
-        let result = keypad.press(key)
-        if let token = result.token {
+        let outcome = keypad.activate(key)
+        guard let face = outcome.face else { return }
+        unavailableKeyLabel = nil
+        switch face.effect {
+        case .insert(let token):
             buffer.insert(token)
+            recallIndex = -1
+        case .delete:
+            // DEL removes under the caret; at the end of the line there is nothing under it, so
+            // it falls back to a backspace, which is what the hardware feels like there.
+            if buffer.cursor < buffer.text.count { buffer.delete() } else { buffer.backspace() }
+        case .clear:
+            clear()
+        case .enter:
+            submit()
+        case .recallEntry:
+            recallPreviousEntry()
+        case .toggleInsertMode:
+            buffer.isOverwriting.toggle()
+        case .move(let cursor):
+            move(cursor)
+        case .open(let destination):
+            screen = Screen(destination)
+        case .unavailable:
+            unavailableKeyLabel = face.label
         }
     }
+
+    /// The arrow pad. Left and right walk the entry line; up and down walk the entry history,
+    /// as they do on the TI's home screen.
+    public func move(_ cursor: KeypadCursor) {
+        switch cursor {
+        case .left: buffer.moveLeft()
+        case .right: buffer.moveRight()
+        case .up: recallPreviousEntry()
+        case .down: recallNextEntry()
+        }
+    }
+
+    public var isOverwriting: Bool { buffer.isOverwriting }
 
     public func backspace() {
         buffer.backspace()
@@ -80,6 +133,7 @@ public final class CalculatorModel {
         buffer.clear()
         keypad.clear()
         recallIndex = -1
+        unavailableKeyLabel = nil
     }
 
     /// ENTER.
@@ -99,6 +153,15 @@ public final class CalculatorModel {
         guard !inputs.isEmpty else { return }
         recallIndex = min(recallIndex + 1, inputs.count - 1)
         buffer.replace(with: inputs[recallIndex])
+    }
+
+    /// The other direction: back down towards the line that was being typed. Stepping past the
+    /// most recent entry leaves the line empty, as arrowing back down does on the hardware.
+    public func recallNextEntry() {
+        let inputs = calculator.history.recallableInputs
+        guard recallIndex >= 0 else { return }
+        recallIndex -= 1
+        buffer.replace(with: recallIndex >= 0 && recallIndex < inputs.count ? inputs[recallIndex] : "")
     }
 
     /// Tapping a history row puts it back on the entry line.

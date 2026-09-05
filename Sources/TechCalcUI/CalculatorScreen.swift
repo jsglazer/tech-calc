@@ -15,6 +15,19 @@ public enum Screen: String, CaseIterable, Identifiable, Hashable {
 
     public var id: String { rawValue }
 
+    /// The screen a keypad menu key asks for. The core names a destination; this is the one
+    /// place that says which screen it is.
+    init(_ destination: KeypadDestination) {
+        switch destination {
+        case .calculator: self = .calculator
+        case .lists: self = .lists
+        case .matrices: self = .matrices
+        case .statTests: self = .statTests
+        case .finance: self = .finance
+        case .mode: self = .mode
+        }
+    }
+
     var symbol: String {
         switch self {
         case .calculator: "function"
@@ -28,17 +41,25 @@ public enum Screen: String, CaseIterable, Identifiable, Hashable {
 }
 
 public struct CalculatorScreen: View {
-    @State private var model: CalculatorModel
-    @State private var screen: Screen = .calculator
+    @Bindable private var model: CalculatorModel
+    @Environment(\.colorScheme) private var systemScheme
 
     public init(model: CalculatorModel) {
-        _model = State(initialValue: model)
+        _model = Bindable(wrappedValue: model)
+    }
+
+    /// The screen selection lives on the model because the keypad's menu keys move it too.
+    private var palette: CalculatorPalette {
+        CalculatorPalette.resolve(theme: model.theme, systemScheme: systemScheme)
     }
 
     public var body: some View {
         NavigationSplitView {
             #if os(macOS)
-            List(Screen.allCases, selection: $screen) { item in
+            List(Screen.allCases, selection: Binding(
+                get: { model.screen },
+                set: { model.screen = $0 ?? model.screen }
+            )) { item in
                 Label(item.rawValue, systemImage: item.symbol).tag(item)
             }
             .navigationSplitViewColumnWidth(min: 160, ideal: 180)
@@ -47,14 +68,14 @@ public struct CalculatorScreen: View {
             // detail switch below is unchanged: only the way a row is chosen differs.
             List {
                 ForEach(Screen.allCases) { item in
-                    Button { screen = item } label: {
+                    Button { model.screen = item } label: {
                         Label(item.rawValue, systemImage: item.symbol)
                     }
                 }
             }
             #endif
         } detail: {
-            switch screen {
+            switch model.screen {
             case .calculator: CalculatorPane(model: model)
             case .lists: ListEditorScreen(model: model)
             case .matrices: MatrixEditorScreen(model: model)
@@ -63,8 +84,10 @@ public struct CalculatorScreen: View {
             case .mode: ModeScreen(model: model)
             }
         }
+        .environment(\.palette, palette)
+        .preferredColorScheme(model.theme.colorScheme)
         #if os(macOS)
-        .frame(minWidth: 720, minHeight: 560)
+        .frame(minWidth: 720, minHeight: 780)
         #endif
     }
 }
@@ -72,15 +95,16 @@ public struct CalculatorScreen: View {
 /// The calculator surface: history above, entry line below, keypad at the bottom.
 struct CalculatorPane: View {
     let model: CalculatorModel
+    @Environment(\.palette) private var palette
 
     var body: some View {
         VStack(spacing: 0) {
             HistoryPane(model: model)
             Divider()
             EntryLine(model: model)
-            Divider()
-            KeypadGrid(model: model)
+            KeypadView(model: model)
         }
+        .background(palette.background)
         .navigationTitle("TechCalc")
         .toolbar {
             ToolbarItem {
@@ -97,6 +121,7 @@ struct CalculatorPane: View {
 /// nothing is ever blank.
 struct HistoryPane: View {
     let model: CalculatorModel
+    @Environment(\.palette) private var palette
 
     private let entryFontSize: CGFloat = 13
     private let resultFontSize: CGFloat = 17
@@ -108,11 +133,11 @@ struct HistoryPane: View {
                     ForEach(model.entries) { entry in
                         VStack(alignment: .trailing, spacing: 2) {
                             typeset(model.inputNode(for: entry), fallback: entry.input, size: entryFontSize)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(palette.displaySecondaryText)
                                 .onTapGesture { model.insert(entry: entry, useResult: false) }
 
                             typeset(model.resultNode(for: entry), fallback: entry.display, size: resultFontSize)
-                                .foregroundStyle(entry.isError ? Color.red : Color.primary)
+                                .foregroundStyle(entry.isError ? palette.errorText : palette.displayText)
                                 .onTapGesture { model.insert(entry: entry, useResult: true) }
                         }
                         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -124,6 +149,7 @@ struct HistoryPane: View {
                 }
                 .padding(12)
             }
+            .background(palette.display)
             .onChange(of: model.entries.count) {
                 if let last = model.entries.last { proxy.scrollTo(last.id, anchor: .bottom) }
             }
@@ -145,6 +171,7 @@ struct HistoryPane: View {
 /// The editable entry line. Typed text and keypad presses land in the same buffer.
 struct EntryLine: View {
     let model: CalculatorModel
+    @Environment(\.palette) private var palette
 
     var body: some View {
         HStack(spacing: 8) {
@@ -154,64 +181,38 @@ struct EntryLine: View {
             ))
             .textFieldStyle(.plain)
             .font(.system(.title3, design: .monospaced))
+            .foregroundStyle(palette.displayText)
             .onSubmit { model.submit() }
             #if os(iOS)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
             #endif
 
-            if model.modifier != .none {
-                Text(model.modifier.rawValue.uppercased())
-                    .font(.caption.bold())
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.accentColor.opacity(0.2), in: Capsule())
+            // The status corner the hardware keeps in its top right: the armed latch, the INS
+            // toggle, and the name of the last key pressed that this build does not implement.
+            if let unavailable = model.unavailableKeyLabel {
+                Text("\(unavailable) — not in this version")
+                    .font(.caption)
+                    .foregroundStyle(palette.displaySecondaryText)
             }
-
-            Button("ENTER") { model.submit() }
-                .keyboardShortcut(.return, modifiers: [])
+            if model.isOverwriting {
+                statusChip("INS")
+            }
+            if model.modifier != .none {
+                statusChip(model.modifier == .alphaLock ? "A-LOCK" : model.modifier.rawValue.uppercased())
+            }
         }
         .padding(12)
+        .background(palette.display)
+    }
+
+    private func statusChip(_ text: String) -> some View {
+        Text(text)
+            .font(.caption.bold())
+            .foregroundStyle(palette.display)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(palette.latchHighlight, in: Capsule())
     }
 }
 
-/// The TI-style keypad. Every label and inserted token comes from `KeypadLayout`, which reads
-/// `FunctionCatalog` — no function name is spelled in this view.
-struct KeypadGrid: View {
-    let model: CalculatorModel
-
-    private let columns = [GridItem(.adaptive(minimum: 56), spacing: 6)]
-
-    var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 6) {
-                ForEach(KeypadLayout.keys) { key in
-                    Button {
-                        model.press(key)
-                    } label: {
-                        Text(label(for: key))
-                            .font(.system(.body, design: .monospaced))
-                            .frame(maxWidth: .infinity, minHeight: 34)
-                    }
-                    .buttonStyle(.bordered)
-                }
-                Button("DEL") { model.backspace() }
-                    .frame(maxWidth: .infinity, minHeight: 34)
-                    .buttonStyle(.bordered)
-                Button("CLEAR") { model.clear() }
-                    .frame(maxWidth: .infinity, minHeight: 34)
-                    .buttonStyle(.bordered)
-            }
-            .padding(12)
-        }
-        .frame(maxHeight: 260)
-    }
-
-    private func label(for key: KeypadKey) -> String {
-        switch key.role {
-        case .secondModifier: "2nd"
-        case .alphaModifier: "ALPHA"
-        case .token: key.token(on: model.modifier.layer) ?? key.id
-        }
-    }
-}
