@@ -10,7 +10,7 @@ The TI-84 is the reference for *what the calculator can do* and *how its keys ar
 
 ## Status
 
-**Built.** The whole TI-84 function set is implemented and under headless test, results are typeset in the history pane, and the form screens — `STAT TESTS`, the TVM solver, the list and matrix editors, `MODE` — are in the app. What remains before a release is visual QA and packaging on macOS, not engine work.
+**Built.** The whole TI-84 function set is implemented and under headless test, results are typeset in the history pane, the form screens — `STAT TESTS`, the TVM solver, the list and matrix editors, `MODE` — are in the app, and the keypad is now the hardware's key for key. What remains before a release is packaging on macOS, not engine work.
 
 | Phase | Scope | State |
 | --- | --- | --- |
@@ -24,6 +24,10 @@ Graphing, TI-BASIC, Python and CAS are explicit non-goals.
 
 ### The app
 
+- **The keypad, key for key.** Five columns and ten rows, with the arrow pad spanning the right of rows 2 and 3 — every key in its printed position, its `2nd` and `ALPHA` faces silkscreened above it as the case prints them. A key carries three *faces*, each a label plus an effect, so a key can type, edit, move the caret or open a screen: `mode` and `2nd QUIT` move between `MODE` and the home screen, `stat` and `2nd LIST` open the list editor, `2nd MATRIX` the matrix editor, `2nd DISTR` the stat tests, `apps` the TVM solver. The arrows walk the entry line and the entry history; `2nd INS` flips the buffer to overwrite. The `ALPHA` letters run `A`–`Z` then `θ` in the order the case prints them, taken from the evaluator's own variable names so the keypad cannot offer a name the evaluator would reject.
+
+  Faces the TI prints that this build has no feature for — the whole graphing row, `math`, `prgm`, `vars`, `on`/`off`, `link`, `angle`, `draw`, `test`, `rcl`, `mem`, `catalog`, `solve`, and the sequence variables `u`/`v`/`w` — are drawn in their true positions and dimmed rather than dropped, so the layout matches the hardware without inventing behaviour. Pressing one names itself and does nothing.
+- **Two skins.** System, Light, or Cyan Dark — cyan on black — chosen in `MODE ▸ Theme`. The views read a palette from the environment rather than naming colours, so the two skins differ in exactly one file. The choice is stored beside the document, not inside it, so a saved calculator stays portable.
 - **Typeset results.** Fractions are built up, radicals are stroked, exponents and subscripts are set at script size, and matrices are bracketed and column-aligned — drawn by a recursive SwiftUI view over the evaluator's own AST. There is no web view and no third-party typesetting library, and the geometry is computed in `TechCalcCore` as pure values, so a layout is asserted in a test rather than by looking at it.
 - **Copy as LaTeX, export as Markdown.** A separate AST-to-LaTeX serializer serves the clipboard and the export; nothing on screen is drawn through LaTeX.
 - **The form screens.** Seventeen `STAT TESTS` procedures share one screen, because a form is data: `StatForms` declares the fields each procedure collects and runs it. The TVM solver, the `L1`–`L6` list editor, the `[A]`–`[J]` matrix editor and `MODE` are the other four. No screen computes anything — each collects values and calls a pure function.
@@ -32,7 +36,7 @@ Graphing, TI-BASIC, Python and CAS are explicit non-goals.
 
 - **One input path.** Keypad presses and typed characters land in the same edit buffer and are lexed by the same tokenizer, so `sin⁻¹(.5)` typed and `sin⁻¹(.5)` keyed are indistinguishable downstream.
 - **TI precedence, exactly.** Implicit multiplication binds as `*` does and groups left to right, so `1/2X` is `(1/2)X`. Negation binds looser than exponentiation, so `-3^2` is `-9` and `(-3)^2` is `9`. `^` is right-associative, so `2^3^2` is `512`. Adjacent calls such as `sin(2)cos(2)` are a product. Unclosed parentheses close themselves on ENTER.
-- **The `2nd` / `ALPHA` state machine**, including single-shot latches and A-LOCK.
+- **The `2nd` / `ALPHA` state machine**, including single-shot latches and A-LOCK — a pure value type with no view attached, so the whole latch behaviour is exercised headlessly.
 - **Complex arithmetic**, always computed. `REAL` / `a+bi` / `re^θi` governs presentation and whether a complex answer is refused as `ERR:NONREAL ANS` — there is no separate real code path to drift out of step.
 - **`MODE`:** DEG/RAD, NORMAL/SCI/ENG, FLOAT and fixed 0–9, the complex modes, and answer as auto/decimal/fraction. `▸Frac` reconstructs a rational up to denominator 9999.
 - **`Ans`, `STO▸`, variables `A`–`Z` and `θ`**, and `STO▸rand` to reseed.
@@ -74,6 +78,7 @@ A few load-bearing decisions:
 
 - **A native Swift parser**, not JavaScriptCore or mathjs: iOS has no JIT, and a Pratt parser over the TI precedence table keeps the AST directly inspectable.
 - **One `FunctionCatalog`** declares every supported function once — name, arity, argument labels, menu path, keypad token. The tokenizer, the parser, the menus and the keypad all read it, so a function's spelling exists in exactly one place.
+- **One `KeypadLayout`** declares the hardware: each key's position, its three printed faces, and what each face does. The core names a destination, not a view, so no function name or screen is spelled in the keypad's SwiftUI — that file only draws what the layout describes, and the layout is asserted in tests rather than judged against the photograph it was read from.
 - **One `TIValue`** crosses the evaluator, and complex arithmetic is unconditional.
 - **`Double` throughout**, with parity achieved at the display layer: results round to 10 significant digits and the formatter honours the notation and decimal settings. The TI's 14-digit BCD representation is not reproduced.
 - **Every iterative routine is step-limited** — Romberg integration caps at 20 refinement levels, summation at a million terms, the distribution inverses and the `I%` / `irr(` root-finds at 200 — and throws `ERR:ITERATIONS` rather than spinning.
@@ -89,7 +94,7 @@ A few load-bearing decisions:
 swift test
 ```
 
-303 tests across 28 suites, all headless, all deterministic: parser precedence and syntax, the keypad modifier state machine, scalar evaluation and error parity, display formatting, persistence roundtrips, seeded randomness, iterative numerics, 1-based indexing, list and matrix operations, the statistics and finance engines, number bases, a walk of the entire function catalog, the AST-to-LaTeX serializer as a pure string transform, the typeset layout's geometry, the stat-test forms against the procedures they call, the TVM solver form, and mechanical checks that the core's source contains none of the banned imports or unseeded randomness and that no statistical or financial logic has leaked into a SwiftUI view.
+320 tests across 29 suites, all headless, all deterministic: parser precedence and syntax, the keypad modifier state machine, the keypad layout — every grid cell filled exactly once, the `ALPHA` letters in printed order, each `2nd` face on the right key, and the inert faces present rather than missing — scalar evaluation and error parity, display formatting, persistence roundtrips, seeded randomness, iterative numerics, 1-based indexing, list and matrix operations, the statistics and finance engines, number bases, a walk of the entire function catalog, the AST-to-LaTeX serializer as a pure string transform, the typeset layout's geometry, the stat-test forms against the procedures they call, the TVM solver form, and mechanical checks that the core's source contains none of the banned imports or unseeded randomness and that no statistical or financial logic has leaked into a SwiftUI view.
 
 Inside that run is a 164-case TI-84 benchmark suite. **No expected value in it was produced by running tech-calc**: each entry carries a provenance naming R 4.5.3 (`stats::pnorm`, `stats::lm`, `stats::t.test`, `stats::uniroot`, …), the TI-84 Plus CE guidebook's documented rule evaluated in R, or a recorded developer decision — and the runner fails the build on a fixture that has no provenance or that names the code under test. The suite is regenerated by `~/.claude/scripts/techcalc-fixtures.R` rather than kept as a frozen blob.
 
