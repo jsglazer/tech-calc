@@ -10,7 +10,7 @@ The TI-84 is the reference for *what the calculator can do* and *how its keys ar
 
 ## Status
 
-**Feature-complete against the v1 scope.** All four build phases are done and the whole function set is under headless test. What remains before a release is visual QA and packaging on macOS, not more engine work.
+**The engine is feature-complete; the app is not.** The whole TI-84 function set is implemented and under headless test. The UI is still the minimal shell the first phase put up — history pane, entry line, keypad — so the typeset result rendering and the form screens are the remaining build work.
 
 | Phase | Scope | State |
 | --- | --- | --- |
@@ -18,8 +18,15 @@ The TI-84 is the reference for *what the calculator can do* and *how its keys ar
 | M2 | Lists `L1`–`L6`, matrices `[A]`–`[J]`, their editors and operations | **Done** |
 | M4 | `STAT CALC`, `DISTR`, `TESTS` — regressions, distributions, hypothesis tests, intervals | **Done** |
 | M5 | TVM solver and finance functions, number bases, bitwise operations | **Done** |
+| M6 | AST-to-LaTeX serializer, typeset result rendering, the form screens | Not started |
 
 Graphing, TI-BASIC, Python and CAS are explicit non-goals.
+
+### Not built yet
+
+- **Typeset results.** The history pane renders monospaced text. Fractions, radicals, exponents, subscripts and matrices are meant to be drawn by a recursive SwiftUI view over the evaluator's own AST.
+- **Copy as LaTeX / Markdown export.** The AST-to-LaTeX serializer does not exist yet.
+- **The form screens.** `STAT TESTS` forms, the TVM solver, the list and matrix editors, and the MODE screen. The pure functions behind all of them are built and tested; only the screens are missing, so everything is reachable from the entry line in the meantime.
 
 ### The engine
 
