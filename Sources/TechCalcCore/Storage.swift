@@ -37,7 +37,11 @@ public final class InMemoryStorageProvider: StorageProvider, @unchecked Sendable
 /// The single versioned persisted document — `state.json`.
 public struct CalculatorDocument: Equatable, Sendable, Codable {
     /// Bumped whenever the on-disk shape changes; older documents are migrated on read.
-    public static let currentSchemaVersion = 1
+    ///
+    /// Version 2 adds the `FINANCE ▸ TVM Solver` fields. A version 1 document has none, so it
+    /// migrates by taking the defaults — the solver screen opens on a fresh scenario rather than
+    /// failing the load.
+    public static let currentSchemaVersion = 2
 
     public var schemaVersion: Int
     public var mode: CalculatorMode
@@ -49,6 +53,10 @@ public struct CalculatorDocument: Equatable, Sendable, Codable {
     /// `[A]`-`[J]`.
     public var matrices: [String: TIMatrix]
     public var history: HistoryLog
+    /// The TVM solver's fields. Solver *inputs* are a document — a screen the user fills in and
+    /// comes back to — where the statistics results, which are computed rather than entered, stay
+    /// session-only. That is the developer's resolution of the fork D28 left open.
+    public var finance: FinanceVariables
 
     public init(
         schemaVersion: Int = CalculatorDocument.currentSchemaVersion,
@@ -57,7 +65,8 @@ public struct CalculatorDocument: Equatable, Sendable, Codable {
         ans: TIValueSnapshot = .real(0),
         lists: [String: TIList] = [:],
         matrices: [String: TIMatrix] = [:],
-        history: HistoryLog = HistoryLog()
+        history: HistoryLog = HistoryLog(),
+        finance: FinanceVariables = FinanceVariables()
     ) {
         self.schemaVersion = schemaVersion
         self.mode = mode
@@ -66,10 +75,11 @@ public struct CalculatorDocument: Equatable, Sendable, Codable {
         self.lists = lists
         self.matrices = matrices
         self.history = history
+        self.finance = finance
     }
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, mode, variables, ans, lists, matrices, history
+        case schemaVersion, mode, variables, ans, lists, matrices, history, finance
     }
 
     /// Decoding tolerates absent optional sections so a document written by an earlier build
@@ -87,6 +97,9 @@ public struct CalculatorDocument: Equatable, Sendable, Codable {
         self.lists = try container.decodeIfPresent([String: TIList].self, forKey: .lists) ?? [:]
         self.matrices = try container.decodeIfPresent([String: TIMatrix].self, forKey: .matrices) ?? [:]
         self.history = try container.decodeIfPresent(HistoryLog.self, forKey: .history) ?? HistoryLog()
+        // Absent in a version 1 document: migrate-on-read gives it the solver's own defaults.
+        self.finance = try container.decodeIfPresent(FinanceVariables.self, forKey: .finance)
+            ?? FinanceVariables()
     }
 }
 

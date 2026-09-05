@@ -131,7 +131,8 @@ public struct Calculator: Sendable {
             ans: context.ans,
             lists: lists,
             matrices: matrices,
-            history: history
+            history: history,
+            finance: context.finance
         )
     }
 
@@ -160,7 +161,8 @@ public struct Calculator: Sendable {
             variables: variables,
             ans: document.ans,
             lists: lists,
-            matrices: matrices
+            matrices: matrices,
+            finance: document.finance
         )
         return Calculator(context: context, history: document.history, random: random)
     }

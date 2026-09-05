@@ -157,3 +157,69 @@ struct PersistenceTests {
         #expect(reloaded.schemaVersion == CalculatorDocument.currentSchemaVersion)
     }
 }
+
+/// The TVM solver's fields are part of the document; the statistics results are not.
+///
+/// That split is the developer's resolution of the fork D28 left open: solver *inputs* are a
+/// screen the user fills in and comes back to, computed *results* are not. Both halves are
+/// asserted here so the decision cannot drift silently.
+@Suite("Finance persistence")
+struct FinancePersistenceTests {
+
+    private func scenario() -> FinanceVariables {
+        FinanceVariables(
+            n: 360, interestPercent: 6.5, presentValue: 250_000,
+            payment: -1580.17, futureValue: 0,
+            paymentsPerYear: 12, compoundsPerYear: 12, timing: .begin
+        )
+    }
+
+    @Test("The TVM fields survive a save and reload")
+    func financeRoundtrips() throws {
+        var calculator = Fixture.calculator()
+        calculator.context.finance = scenario()
+        let store = DocumentStore(provider: InMemoryStorageProvider())
+        try calculator.save(to: store)
+
+        let restored = try Calculator.loaded(from: store, random: SeededRandomSource(seed: 1))
+        #expect(restored.context.finance == scenario())
+        #expect(restored.context.finance.timing == .begin)
+    }
+
+    @Test("A version 1 document, written before the solver screen existed, still opens")
+    func migratesFromVersionOne() throws {
+        // Exactly what the previous build wrote: no `finance` section, and version 1.
+        let legacy = Data("""
+        {"ans":{"real":{"_0":7}},"schemaVersion":1}
+        """.utf8)
+        let store = DocumentStore(provider: InMemoryStorageProvider(initialData: legacy))
+        let document = try store.load()
+
+        #expect(document.finance == FinanceVariables())
+        #expect(document.ans == .real(7))
+        // Migrate-on-read stamps the current version, so the next save is a version 2 document.
+        #expect(document.schemaVersion == CalculatorDocument.currentSchemaVersion)
+        #expect(CalculatorDocument.currentSchemaVersion == 2)
+    }
+
+    @Test("A document from a newer build is refused rather than silently misread")
+    func refusesANewerSchema() {
+        let future = Data("""
+        {"schemaVersion":99}
+        """.utf8)
+        let store = DocumentStore(provider: InMemoryStorageProvider(initialData: future))
+        #expect(throws: TIError.self) { try store.load() }
+    }
+
+    @Test("Statistics results stay session-only: they are computed, not entered")
+    func statisticsResultsAreNotPersisted() throws {
+        var calculator = Fixture.calculator()
+        calculator.enter("T-Test(10,12,2,30,1)")
+        #expect(!calculator.context.statistics.isEmpty)
+
+        let store = DocumentStore(provider: InMemoryStorageProvider())
+        try calculator.save(to: store)
+        let restored = try Calculator.loaded(from: store, random: SeededRandomSource(seed: 1))
+        #expect(restored.context.statistics.isEmpty)
+    }
+}

@@ -10,7 +10,7 @@ The TI-84 is the reference for *what the calculator can do* and *how its keys ar
 
 ## Status
 
-**The engine is feature-complete; the app is not.** The whole TI-84 function set is implemented and under headless test. The UI is still the minimal shell the first phase put up — history pane, entry line, keypad — so the typeset result rendering and the form screens are the remaining build work.
+**Built.** The whole TI-84 function set is implemented and under headless test, results are typeset in the history pane, and the form screens — `STAT TESTS`, the TVM solver, the list and matrix editors, `MODE` — are in the app. What remains before a release is visual QA and packaging on macOS, not engine work.
 
 | Phase | Scope | State |
 | --- | --- | --- |
@@ -18,15 +18,15 @@ The TI-84 is the reference for *what the calculator can do* and *how its keys ar
 | M2 | Lists `L1`–`L6`, matrices `[A]`–`[J]`, their editors and operations | **Done** |
 | M4 | `STAT CALC`, `DISTR`, `TESTS` — regressions, distributions, hypothesis tests, intervals | **Done** |
 | M5 | TVM solver and finance functions, number bases, bitwise operations | **Done** |
-| M6 | AST-to-LaTeX serializer, typeset result rendering, the form screens | Not started |
+| M6 | AST-to-LaTeX serializer, typeset result rendering, the form screens | **Done** |
 
 Graphing, TI-BASIC, Python and CAS are explicit non-goals.
 
-### Not built yet
+### The app
 
-- **Typeset results.** The history pane renders monospaced text. Fractions, radicals, exponents, subscripts and matrices are meant to be drawn by a recursive SwiftUI view over the evaluator's own AST.
-- **Copy as LaTeX / Markdown export.** The AST-to-LaTeX serializer does not exist yet.
-- **The form screens.** `STAT TESTS` forms, the TVM solver, the list and matrix editors, and the MODE screen. The pure functions behind all of them are built and tested; only the screens are missing, so everything is reachable from the entry line in the meantime.
+- **Typeset results.** Fractions are built up, radicals are stroked, exponents and subscripts are set at script size, and matrices are bracketed and column-aligned — drawn by a recursive SwiftUI view over the evaluator's own AST. There is no web view and no third-party typesetting library, and the geometry is computed in `TechCalcCore` as pure values, so a layout is asserted in a test rather than by looking at it.
+- **Copy as LaTeX, export as Markdown.** A separate AST-to-LaTeX serializer serves the clipboard and the export; nothing on screen is drawn through LaTeX.
+- **The form screens.** Seventeen `STAT TESTS` procedures share one screen, because a form is data: `StatForms` declares the fields each procedure collects and runs it. The TVM solver, the `L1`–`L6` list editor, the `[A]`–`[J]` matrix editor and `MODE` are the other four. No screen computes anything — each collects values and calls a pure function.
 
 ### The engine
 
@@ -78,7 +78,9 @@ A few load-bearing decisions:
 - **`Double` throughout**, with parity achieved at the display layer: results round to 10 significant digits and the formatter honours the notation and decimal settings. The TI's 14-digit BCD representation is not reproduced.
 - **Every iterative routine is step-limited** — Romberg integration caps at 20 refinement levels, summation at a million terms, the distribution inverses and the `I%` / `irr(` root-finds at 200 — and throws `ERR:ITERATIONS` rather than spinning.
 - **One solver per job.** Every distribution inverse routes through a single bracketed bisection-with-Newton; `I%` and `irr(` share a single bisection-with-secant. There is one convergence policy to audit, not one per function.
-- **No statistical or financial arithmetic in a view.** Every test, interval, regression and TVM solve is a pure function over an input struct; the form screens and the typed command form are two callers of it.
+- **No statistical or financial arithmetic in a view.** Every test, interval, regression and TVM solve is a pure function over an input struct; the form screens and the typed command form are two callers of it, and a mechanical test reads the SwiftUI sources to keep it that way.
+- **Typeset geometry is computed in the core.** `TypesetLayout` turns an AST into positioned boxes — widths, ascents, baseline shifts — and the SwiftUI view only draws them. A layout that can only be checked by looking at it would be a layout that should have been a pure function first.
+- **One versioned document.** `state.json` carries the mode, `A`–`Z`, `Ans`, the lists, the matrices, the history and the TVM solver's fields, written atomically through the injected provider and migrated on read. Solver *inputs* persist because they are a document the user fills in and comes back to; computed statistics results do not.
 - **1-based indexing** at the TI syntax layer, with the conversion to Swift's 0-based indices confined to a single accessor per container type.
 
 ## Tests
@@ -87,7 +89,7 @@ A few load-bearing decisions:
 swift test
 ```
 
-238 tests across 23 suites, all headless, all deterministic: parser precedence and syntax, the keypad modifier state machine, scalar evaluation and error parity, display formatting, persistence roundtrips, seeded randomness, iterative numerics, 1-based indexing, list and matrix operations, the statistics and finance engines, number bases, a walk of the entire function catalog, and mechanical checks that the core's source contains none of the banned imports or unseeded randomness.
+303 tests across 28 suites, all headless, all deterministic: parser precedence and syntax, the keypad modifier state machine, scalar evaluation and error parity, display formatting, persistence roundtrips, seeded randomness, iterative numerics, 1-based indexing, list and matrix operations, the statistics and finance engines, number bases, a walk of the entire function catalog, the AST-to-LaTeX serializer as a pure string transform, the typeset layout's geometry, the stat-test forms against the procedures they call, the TVM solver form, and mechanical checks that the core's source contains none of the banned imports or unseeded randomness and that no statistical or financial logic has leaked into a SwiftUI view.
 
 Inside that run is a 164-case TI-84 benchmark suite. **No expected value in it was produced by running tech-calc**: each entry carries a provenance naming R 4.5.3 (`stats::pnorm`, `stats::lm`, `stats::t.test`, `stats::uniroot`, …), the TI-84 Plus CE guidebook's documented rule evaluated in R, or a recorded developer decision — and the runner fails the build on a fixture that has no provenance or that names the code under test. The suite is regenerated by `~/.claude/scripts/techcalc-fixtures.R` rather than kept as a frozen blob.
 

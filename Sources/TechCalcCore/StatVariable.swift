@@ -73,6 +73,30 @@ public enum StatVariable: String, Equatable, Hashable, Sendable, CaseIterable, C
         }
     }
 
+    /// How the variable is typeset. Overridden only where LaTeX has a real construct for the
+    /// TI's glyph; everything else is set upright from `name`, so a new case needs nothing here.
+    public var latexName: String {
+        switch self {
+        case .meanX: "\\bar{x}"
+        case .meanY: "\\bar{y}"
+        case .meanX1: "\\bar{x}_{1}"
+        case .meanX2: "\\bar{x}_{2}"
+        case .proportion: "\\hat{p}"
+        case .proportion1: "\\hat{p}_{1}"
+        case .proportion2: "\\hat{p}_{2}"
+        case .chiSquareStatistic: "\\chi^{2}"
+        case .determination: "r^{2}"
+        case .sumX: "\\Sigma x"
+        case .sumY: "\\Sigma y"
+        case .sumSquaredX: "\\Sigma x^{2}"
+        case .sumSquaredY: "\\Sigma y^{2}"
+        case .sumXY: "\\Sigma xy"
+        case .populationDeviationX: "\\sigma x"
+        case .populationDeviationY: "\\sigma y"
+        default: "\\mathrm\u{7B}" + name + "\u{7D}"
+        }
+    }
+
     /// Every spelling mapped to its case, longest first, so the tokenizer's longest-match scan
     /// resolves `Sx1` before `Sx` and `minX` before the `min(` function.
     public static let spellingIndex: [(spelling: String, variable: StatVariable)] = {
@@ -114,4 +138,8 @@ public struct StatisticsVariables: Equatable, Sendable {
     }
 
     public var isEmpty: Bool { values.isEmpty }
+
+    /// The whole bag, for a results pane and for the tests that compare what a form screen shows
+    /// with what the entry-line command published.
+    public var asDictionary: [StatVariable: Double] { values }
 }

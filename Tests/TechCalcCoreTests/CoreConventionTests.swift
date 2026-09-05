@@ -11,7 +11,7 @@ import Testing
 struct CoreConventionTests {
 
     /// `Sources/TechCalcCore`, located relative to this test file.
-    private static var coreSourceFiles: [URL] {
+    static var coreSourceFiles: [URL] {
         get throws {
             let testFile = URL(fileURLWithPath: #filePath)
             let packageRoot = testFile
@@ -182,6 +182,106 @@ struct CoreConventionTests {
         #expect(!dispatch.contains("/ 100"))
         #expect(dispatch.contains("Finance."))
         #expect(dispatch.contains("NumberBases."))
+    }
+
+    /// `Sources/TechCalcUI`, located the same way the core directory is.
+    static var interfaceSourceFiles: [URL] {
+        get throws {
+            let packageRoot = URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent()
+                .deletingLastPathComponent()
+                .deletingLastPathComponent()
+            let directory = packageRoot
+                .appendingPathComponent("Sources")
+                .appendingPathComponent("TechCalcUI")
+            return try FileManager.default
+                .contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+                .filter { $0.pathExtension == "swift" }
+        }
+    }
+
+    @Test("No statistical, financial or numerical logic lives in a SwiftUI view")
+    func viewsHoldNoLogic() throws {
+        // The companion to `financeArithmeticStaysInFinance`, for the UI side. A screen may call a
+        // pure entry point — `StatForms.run`, `Finance.solve` — but must not reach past it into the
+        // procedures themselves, and must not do arithmetic of its own.
+        let banned = [
+            "Inference.", "Statistics.", "Distributions.", "SpecialFunctions.",
+            "MatrixMath.", "ListMath.", "NumericMethods.", "Rational.",
+            "sqrt", "squareRoot()", "Foundation.pow", "/ 100", "* 100"
+        ]
+        for url in try Self.interfaceSourceFiles {
+            let source = try Self.code(of: url)
+            for token in banned {
+                #expect(!source.contains(token), "\(url.lastPathComponent) contains \(token)")
+            }
+        }
+    }
+
+    @Test("The screens reach TechCalcCore through its declared form tables, not by hard-coding")
+    func viewsAreGeneratedFromTheCoreTables() throws {
+        var sources: [String: String] = [:]
+        for url in try Self.interfaceSourceFiles {
+            sources[url.lastPathComponent] = try Self.code(of: url)
+        }
+        // The `STAT TESTS` screen renders whatever `StatForms` declares: it names no procedure and
+        // switches only on a field's declared control kind.
+        let statScreen: String = try #require(sources["StatTestsScreen.swift"])
+        #expect(statScreen.contains("StatForms.all"))
+        for procedure in FunctionCatalog.entries(inMenu: "STAT TESTS") {
+            #expect(!statScreen.contains("\"\(procedure.name)\""),
+                    "the stat screen spells \(procedure.name)")
+        }
+        // The solver screen renders `TVMField` and calls the one solve entry point.
+        let solverScreen: String = try #require(sources["TVMSolverScreen.swift"])
+        #expect(solverScreen.contains("TVMField.allCases"))
+        #expect(solverScreen.contains("TVMField.solvable"))
+        for field in TVMField.allCases {
+            #expect(!solverScreen.contains("\"\(field.label)\""), "the solver screen spells \(field.label)")
+        }
+    }
+
+    @Test("No web view and no third-party typesetting library reaches the renderer")
+    func typesettingIsHandWritten() throws {
+        let banned = ["WKWebView", "WebKit", "SwiftMath", "iosMath", "MathJax", "KaTeX", "latex", "LaTeX("]
+        for url in try Self.interfaceSourceFiles {
+            let source = try Self.code(of: url)
+            for token in banned where token != "latex" {
+                #expect(!source.contains(token), "\(url.lastPathComponent) contains \(token)")
+            }
+        }
+        // The drawing path never goes through LaTeX: only the export helpers name the serializer,
+        // and the view that draws maths does not.
+        let rendererURL = try #require(try Self.interfaceSourceFiles.first {
+            $0.lastPathComponent == "TypesetMathView.swift"
+        })
+        let renderer = try Self.code(of: rendererURL)
+        #expect(!renderer.contains("LaTeX"))
+        #expect(renderer.contains("TypesetLayout.layout"))
+    }
+
+    @Test("The LaTeX spelling of a function is declared in the catalog, like every other spelling")
+    func latexNamesLiveInTheCatalog() throws {
+        var filesContaining: [String] = []
+        for url in try Self.coreSourceFiles where try Self.code(of: url).contains("\\\\sin") {
+            filesContaining.append(url.lastPathComponent)
+        }
+        #expect(filesContaining == ["FunctionCatalog.swift"], "a LaTeX command appears in \(filesContaining)")
+        // Every catalog entry is serializable, whether or not it has a dedicated command.
+        for definition in FunctionCatalog.all {
+            let command = FunctionCatalog.latexCommand(for: definition.id)
+            #expect(command == nil || !(command ?? "").isEmpty)
+        }
+    }
+
+    @Test("The last answer is spelled in one place")
+    func answerSpellingLivesInOnePlace() throws {
+        var filesContaining: [String] = []
+        for url in try Self.coreSourceFiles
+        where try Self.code(of: url).contains("\"\(Tokenizer.answerSpelling)\"") {
+            filesContaining.append(url.lastPathComponent)
+        }
+        #expect(filesContaining == ["Tokenizer.swift"], "Ans is spelled in \(filesContaining)")
     }
 
     @Test("The package declares no external dependencies")

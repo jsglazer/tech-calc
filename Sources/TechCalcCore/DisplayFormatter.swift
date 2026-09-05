@@ -10,6 +10,10 @@ public struct DisplayFormatter: Sendable {
     /// The TI displays 10 significant digits.
     public static let significantDigits = 10
 
+    /// The character that introduces the exponent in scientific and engineering notation. The
+    /// LaTeX serializer reads it back rather than spelling it a second time.
+    public static let exponentGlyph: Character = "E"
+
     /// NORMAL notation gives way to scientific at or above 1e10, and below 1e-3.
     static let normalUpperExponent = 10
     static let normalLowerExponent = -4
@@ -114,7 +118,7 @@ public struct DisplayFormatter: Sendable {
             let places = Swift.max(0, Self.significantDigits - integerDigits)
             mantissaText = Self.trimTrailingZeros(String(format: "%.\(places)f", mantissa))
         }
-        return Self.stripLeadingZero(mantissaText) + "E" + String(exponent)
+        return Self.stripLeadingZero(mantissaText) + String(Self.exponentGlyph) + String(exponent)
     }
 
     // MARK: - Numeric helpers

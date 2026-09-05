@@ -7,6 +7,11 @@ import Foundation
 /// and typed entry cannot diverge. No function name is spelled here — every name comes from
 /// `FunctionCatalog.spellingIndex`.
 public struct Tokenizer: Sendable {
+    /// How the last answer is written on the entry line. Declared once here, the way a function
+    /// name is declared once in the catalog; the typeset builder and the LaTeX serializer read it
+    /// rather than spelling it again.
+    public static let answerSpelling = "Ans"
+
     public init() {}
 
     /// The subtraction key and the `(-)` negation key are distinct on the TI. Typed text has only
@@ -112,7 +117,7 @@ public struct Tokenizer: Sendable {
                 continue
             }
 
-            if let ansLength = matchesLiteral(characters, at: index, "Ans") {
+            if let ansLength = matchesLiteral(characters, at: index, Self.answerSpelling) {
                 tokens.append(.ans)
                 index += ansLength
                 continue

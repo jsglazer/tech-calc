@@ -499,3 +499,37 @@ public enum FunctionCatalog {
         all.filter { $0.menuPath == menuPath }
     }
 }
+
+extension FunctionCatalog {
+    /// The LaTeX command an entry is typeset with, when it has a real one.
+    ///
+    /// This lives here for the same reason every other spelling does: the catalog is the single
+    /// declaration site for what a function is called, in any notation. `nil` means "no dedicated
+    /// command" — the serializer falls back to `\operatorname{…}` over the canonical `name`, so a
+    /// new catalog entry is typeset sensibly without being listed twice.
+    public static func latexCommand(for id: FunctionID) -> String? {
+        switch id {
+        case .sin: "\\sin"
+        case .cos: "\\cos"
+        case .tan: "\\tan"
+        case .asin: "\\sin^{-1}"
+        case .acos: "\\cos^{-1}"
+        case .atan: "\\tan^{-1}"
+        case .sinh: "\\sinh"
+        case .cosh: "\\cosh"
+        case .tanh: "\\tanh"
+        case .asinh: "\\sinh^{-1}"
+        case .acosh: "\\cosh^{-1}"
+        case .atanh: "\\tanh^{-1}"
+        case .log: "\\log"
+        case .ln: "\\ln"
+        case .minimum: "\\min"
+        case .maximum: "\\max"
+        case .gcd: "\\gcd"
+        case .pi: "\\pi"
+        case .eulersNumber: "e"
+        case .imaginaryUnit: "i"
+        default: nil
+        }
+    }
+}

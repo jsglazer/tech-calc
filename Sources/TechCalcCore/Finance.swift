@@ -16,7 +16,7 @@ public enum PaymentTiming: String, Equatable, Hashable, Sendable, Codable, CaseI
 /// The solver screen and the entry-line `tvm_…(` commands are two callers of the same
 /// `Finance` functions, and this struct is what they pass: the screen fills every field and
 /// leaves one blank, while a command overrides only the fields written in its argument list.
-public struct FinanceVariables: Equatable, Sendable {
+public struct FinanceVariables: Equatable, Sendable, Codable {
     /// Number of payment periods.
     public var n: Double
     /// The nominal annual rate as a percent, exactly as the TI's `I%` field takes it.
@@ -445,5 +445,84 @@ public enum Finance {
     /// `dbd(date1, date2)`: the number of days from the first date to the second.
     public static func daysBetween(_ first: Double, _ second: Double) throws -> Double {
         Double(try EnteredDate(second).dayNumber - (try EnteredDate(first).dayNumber))
+    }
+}
+
+/// One field on the `TVM Solver` screen.
+///
+/// The screen is generated from this list rather than hand-wired, so the solver's fields, their
+/// names and which of them can be solved for are declared exactly once — the same rule the
+/// function catalog follows. A view reads labels from here and never spells one.
+public enum TVMField: String, Equatable, Hashable, Sendable, CaseIterable {
+    case periods
+    case ratePercent
+    case presentValue
+    case payment
+    case futureValue
+    case paymentsPerYear
+    case compoundsPerYear
+
+    /// The TI's own field name.
+    public var label: String {
+        switch self {
+        case .periods: "N"
+        case .ratePercent: "I%"
+        case .presentValue: "PV"
+        case .payment: "PMT"
+        case .futureValue: "FV"
+        case .paymentsPerYear: "P/Y"
+        case .compoundsPerYear: "C/Y"
+        }
+    }
+
+    /// The five the TVM equation can be solved for; `P/Y` and `C/Y` are settings, not unknowns.
+    public static let solvable: [TVMField] = [.periods, .ratePercent, .presentValue, .payment, .futureValue]
+
+    public var isSolvable: Bool { Self.solvable.contains(self) }
+
+    public func value(in variables: FinanceVariables) -> Double {
+        switch self {
+        case .periods: variables.n
+        case .ratePercent: variables.interestPercent
+        case .presentValue: variables.presentValue
+        case .payment: variables.payment
+        case .futureValue: variables.futureValue
+        case .paymentsPerYear: variables.paymentsPerYear
+        case .compoundsPerYear: variables.compoundsPerYear
+        }
+    }
+
+    public func setting(_ value: Double, in variables: FinanceVariables) -> FinanceVariables {
+        var updated = variables
+        switch self {
+        case .periods: updated.n = value
+        case .ratePercent: updated.interestPercent = value
+        case .presentValue: updated.presentValue = value
+        case .payment: updated.payment = value
+        case .futureValue: updated.futureValue = value
+        case .paymentsPerYear: updated.paymentsPerYear = value
+        case .compoundsPerYear: updated.compoundsPerYear = value
+        }
+        return updated
+    }
+}
+
+extension Finance {
+    /// Solves the TVM equation for one field and returns the scenario with that field filled in.
+    ///
+    /// This is the *only* place that decides which solve a chosen unknown maps to. The solver
+    /// screen and the entry-line `tvm_…(` commands both come here, so there is one implementation
+    /// and two callers rather than a second solver living in a view.
+    public static func solve(for field: TVMField, _ variables: FinanceVariables) throws -> FinanceVariables {
+        let solved: Double
+        switch field {
+        case .periods: solved = try periods(variables)
+        case .ratePercent: solved = try interestPercent(variables)
+        case .presentValue: solved = try presentValue(variables)
+        case .payment: solved = try payment(variables)
+        case .futureValue: solved = try futureValue(variables)
+        case .paymentsPerYear, .compoundsPerYear: throw TIError.domain
+        }
+        return field.setting(solved, in: variables)
     }
 }
