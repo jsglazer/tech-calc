@@ -151,6 +151,37 @@ struct CoreConventionTests {
         #expect(Distributions.inverseTolerance > 0)
         #expect(RandomLimits.maximumBernoulliTrials > 0)
         #expect(MatrixMath.singularityTolerance > 0)
+        // The finance solvers: `I%` and `irr(` are root-finds, and amortization walks a range.
+        #expect(Finance.maximumSolverIterations > 0)
+        #expect(Finance.solverTolerance > 0)
+        #expect(Finance.maximumPeriodicRate > 0)
+        #expect(Finance.maximumPeriods > 0)
+    }
+
+    @Test("The base prefixes are declared only in NumberBases.swift")
+    func basePrefixesLiveInOnePlace() throws {
+        // The tokenizer reads the entry prefixes and the renderer writes them; neither spells one.
+        for literal in ["\"0b\"", "\"0h\"", "\"0o\""] {
+            var filesContaining: [String] = []
+            for url in try Self.coreSourceFiles where try Self.code(of: url).contains(literal) {
+                filesContaining.append(url.lastPathComponent)
+            }
+            #expect(filesContaining == ["NumberBases.swift"], "\(literal) appears in \(filesContaining)")
+        }
+    }
+
+    @Test("No finance or base arithmetic lives outside its pure module")
+    func financeArithmeticStaysInFinance() throws {
+        // `EvaluatorFinance.swift` is an argument reader: it may name a `Finance` or
+        // `NumberBases` function, but it must not do the arithmetic itself. The TVM equation's
+        // own operator — exponentiation of a rate — appears in `Finance.swift` and nowhere else
+        // in the evaluator, which is what keeps the solver screen and the command form one
+        // implementation rather than two.
+        let dispatch = try Self.code(of: Self.coreSourceFiles.first { $0.lastPathComponent == "EvaluatorFinance.swift" }!)
+        #expect(!dispatch.contains("Foundation.pow"))
+        #expect(!dispatch.contains("/ 100"))
+        #expect(dispatch.contains("Finance."))
+        #expect(dispatch.contains("NumberBases."))
     }
 
     @Test("The package declares no external dependencies")
@@ -180,7 +211,10 @@ struct CoreConventionTests {
 
         // A representative spread of spellings that must appear in exactly one source file.
         let spellings = ["\"sin\"", "\"logBASE\"", "\"nCr\"", "\"fnInt\"", "\"randInt\"", "\"iPart\"",
-                         "\"det\"", "\"rref\"", "\"cumSum\"", "\"SortA\"", "\"stdDev\"", "\"randM\""]
+                         "\"det\"", "\"rref\"", "\"cumSum\"", "\"SortA\"", "\"stdDev\"", "\"randM\"",
+                         // The M5 additions get the same one-declaration rule.
+                         "\"tvm_Pmt\"", "\"tvm_I%\"", "\"npv\"", "\"irr\"", "\"bal\"", "\"dbd\"",
+                         "\"bitAnd\"", "\"bitXor\"", "\"LinRegTInt\""]
         for spelling in spellings {
             var filesContaining: [String] = []
             for url in try Self.coreSourceFiles {

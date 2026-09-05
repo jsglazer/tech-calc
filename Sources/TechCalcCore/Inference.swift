@@ -81,6 +81,25 @@ public struct LinRegTestResult: Equatable, Sendable {
     public let correlation: Double
 }
 
+/// The confidence interval on a regression slope.
+///
+/// It is its own struct rather than a `ConfidenceInterval` because `LinRegTInt` reports the whole
+/// fit alongside the endpoints — the TI's results screen shows `b`, `df`, `a`, `s`, `r²` and `r` —
+/// and publishing a slope through `ConfidenceInterval`'s point-estimate slot would write it into
+/// `x̄`, which means something else.
+public struct LinRegIntervalResult: Equatable, Sendable {
+    public let lower: Double
+    public let upper: Double
+    public let slope: Double
+    public let intercept: Double
+    public let degreesOfFreedom: Double
+    public let residualDeviation: Double
+    public let correlation: Double
+    public let n: Double
+
+    public var marginOfError: Double { (upper - lower) / 2 }
+}
+
 /// A confidence interval.
 public struct ConfidenceInterval: Equatable, Sendable {
     public let lower: Double
@@ -355,6 +374,36 @@ public enum Inference {
             statistic: t, pValue: try studentP(t, df, alternative), degreesOfFreedom: df,
             intercept: intercept, slope: slope, residualDeviation: s,
             correlation: fit.correlation ?? .nan
+        )
+    }
+
+    /// `LinRegTInt`: the t interval on a regression slope.
+    ///
+    /// It shares every piece of its arithmetic with `linRegTTest` above — same fit, same residual
+    /// deviation, same standard error — and differs only in turning them into endpoints instead of
+    /// a p-value, so the test and the interval cannot disagree about a slope.
+    public static func linRegTInt(
+        _ xs: [Double], _ ys: [Double], level: Double
+    ) throws -> LinRegIntervalResult {
+        let test = try linRegTTest(xs, ys, alternative: .twoSided)
+        // The standard error is rebuilt from the fit's residual deviation and the spread of x —
+        // the same two quantities the test's t is a ratio of — rather than divided back out of
+        // `t`, which would be undefined for a fit whose slope is exactly zero.
+        let n = Double(xs.count)
+        let meanX = xs.reduce(0, +) / n
+        let spreadX = xs.reduce(0) { $0 + ($1 - meanX) * ($1 - meanX) }
+        guard spreadX > 0 else { throw TIError.domain }
+        let standardError = test.residualDeviation / spreadX.squareRoot()
+
+        let critical = try Distributions.inverseT(
+            area: try criticalArea(level), degreesOfFreedom: test.degreesOfFreedom)
+        let margin = critical * standardError
+        return LinRegIntervalResult(
+            lower: test.slope - margin, upper: test.slope + margin,
+            slope: test.slope, intercept: test.intercept,
+            degreesOfFreedom: test.degreesOfFreedom,
+            residualDeviation: test.residualDeviation,
+            correlation: test.correlation, n: n
         )
     }
 

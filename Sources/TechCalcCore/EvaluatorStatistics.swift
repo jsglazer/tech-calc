@@ -374,6 +374,10 @@ extension Evaluator {
                 successes2: try number(values, 2), n2: try number(values, 3),
                 level: try number(values, 4)))
 
+        case .linRegTInterval:
+            return publish(try Inference.linRegTInt(
+                try sample(values, 0), try sample(values, 1), level: try number(values, 2)))
+
         default:
             return nil
         }

@@ -1184,6 +1184,362 @@
         "2-PropZInt(45,100,30,90,.95)"
       ],
       "expected": 0.25448065031529604
+    },
+    {
+      "id": "linregtint-lower",
+      "group": "interval",
+      "expression": "lower",
+      "provenance": "R 4.5.3 stats::lm + stats::qt",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegTInt(L1,L2,.95)"
+      ],
+      "expected": 1.9295938110753139
+    },
+    {
+      "id": "linregtint-upper",
+      "group": "interval",
+      "expression": "upper",
+      "provenance": "R 4.5.3 stats::lm + stats::qt",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegTInt(L1,L2,.95)"
+      ],
+      "expected": 2.065644284162782
+    },
+    {
+      "id": "linregtint-slope",
+      "group": "interval",
+      "expression": "b",
+      "provenance": "R 4.5.3 stats::lm",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegTInt(L1,L2,.95)"
+      ],
+      "expected": 1.9976190476190478
+    },
+    {
+      "id": "linregtint-df",
+      "group": "interval",
+      "expression": "df",
+      "provenance": "R 4.5.3 stats::lm residual degrees of freedom",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegTInt(L1,L2,.95)"
+      ],
+      "expected": 6
+    },
+    {
+      "id": "linregtint-s",
+      "group": "interval",
+      "expression": "s",
+      "provenance": "R 4.5.3 stats::lm residual standard error",
+      "setup": [
+        "{1,2,3,4,5,6,7,8}→L1",
+        "{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2",
+        "LinRegTInt(L1,L2,.95)"
+      ],
+      "expected": 0.18016747059421553
+    },
+    {
+      "id": "tvm-pmt-loan",
+      "group": "finance",
+      "expression": "tvm_Pmt(24,6,10000,0,12,12)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": -443.20610252756865
+    },
+    {
+      "id": "tvm-n-loan",
+      "group": "finance",
+      "expression": "tvm_N(6,10000,-443.206102527569,0,12,12)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": 23.999999999999996
+    },
+    {
+      "id": "tvm-i-loan",
+      "group": "finance",
+      "expression": "tvm_I%(24,10000,-443.206102527569,0,12,12)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": 5.9999999999998996,
+      "tolerance": 9.9999999999999995e-08
+    },
+    {
+      "id": "tvm-pv-loan",
+      "group": "finance",
+      "expression": "tvm_PV(24,6,-443.206102527569,0,12,12)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": 10000
+    },
+    {
+      "id": "tvm-fv-loan-closes",
+      "group": "finance",
+      "expression": "tvm_FV(24,6,10000,-443.206102527569,12,12)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": -0,
+      "tolerance": 9.9999999999999995e-07
+    },
+    {
+      "id": "tvm-fv-savings",
+      "group": "finance",
+      "expression": "tvm_FV(120,5,0,-200,12,12)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": 31056.455889133547
+    },
+    {
+      "id": "tvm-pmt-savings",
+      "group": "finance",
+      "expression": "tvm_Pmt(120,5,0,31056.4558891335,12,12)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": -200,
+      "tolerance": 1e-08
+    },
+    {
+      "id": "tvm-pmt-mixed-periods",
+      "group": "finance",
+      "expression": "tvm_Pmt(24,6,10000,0,12,4)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": -443.07205139668315
+    },
+    {
+      "id": "tvm-i-mixed-periods",
+      "group": "finance",
+      "expression": "tvm_I%(24,10000,-443.072051396683,0,12,4)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": 5.9999999999999147,
+      "tolerance": 9.9999999999999995e-08
+    },
+    {
+      "id": "tvm-pmt-zero-rate",
+      "group": "finance",
+      "expression": "tvm_Pmt(10,0,1000,0,12,12)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": -100
+    },
+    {
+      "id": "tvm-n-zero-rate",
+      "group": "finance",
+      "expression": "tvm_N(0,1000,-100,0,12,12)",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expected": 10
+    },
+    {
+      "id": "npv-basic",
+      "group": "finance",
+      "expression": "npv(10,-1000,{300,400,500,600})",
+      "provenance": "R 4.5.3 discounted cash flow sum evaluated in R",
+      "expected": 388.7712587937981
+    },
+    {
+      "id": "npv-zero-rate",
+      "group": "finance",
+      "expression": "npv(0,-1000,{300,400,500,600})",
+      "provenance": "R 4.5.3 discounted cash flow sum evaluated in R",
+      "expected": 800
+    },
+    {
+      "id": "npv-frequencies",
+      "group": "finance",
+      "expression": "npv(10,-1000,{300,500},{2,2})",
+      "provenance": "R 4.5.3 discounted cash flow sum evaluated in R",
+      "expected": 237.82528515811737
+    },
+    {
+      "id": "irr-basic",
+      "group": "finance",
+      "expression": "irr(-1000,{300,400,500,600})",
+      "provenance": "R 4.5.3 stats::uniroot on the discounted cash flow sum",
+      "expected": 24.888335662407098,
+      "tolerance": 9.9999999999999995e-08
+    },
+    {
+      "id": "irr-no-sign-change",
+      "group": "finance",
+      "expression": "irr(1000,{300,400})",
+      "provenance": "TI-84 Plus CE guidebook TVM equation, independently evaluated in R",
+      "expectedError": "ERR:NO SIGN CHNG"
+    },
+    {
+      "id": "eff-monthly",
+      "group": "finance",
+      "expression": "▸Eff(6,12)",
+      "provenance": "R 4.5.3 compound interest identity in R",
+      "expected": 6.1677811864498278
+    },
+    {
+      "id": "eff-quarterly",
+      "group": "finance",
+      "expression": "▸Eff(8,4)",
+      "provenance": "R 4.5.3 compound interest identity in R",
+      "expected": 8.2432159999999968
+    },
+    {
+      "id": "nom-monthly",
+      "group": "finance",
+      "expression": "▸Nom(6.167781186450,12)",
+      "provenance": "R 4.5.3 compound interest identity in R",
+      "expected": 6,
+      "tolerance": 1.0000000000000001e-09
+    },
+    {
+      "id": "nom-quarterly",
+      "group": "finance",
+      "expression": "▸Nom(10,4)",
+      "provenance": "R 4.5.3 compound interest identity in R",
+      "expected": 9.6454756337780445
+    },
+    {
+      "id": "dbd-within-leap-year",
+      "group": "finance",
+      "expression": "dbd(3.0124,12.3124)",
+      "provenance": "R 4.5.3 base::Date arithmetic",
+      "expected": 305
+    },
+    {
+      "id": "dbd-across-leap-day",
+      "group": "finance",
+      "expression": "dbd(1.0124,3.0124)",
+      "provenance": "R 4.5.3 base::Date arithmetic",
+      "expected": 60
+    },
+    {
+      "id": "dbd-across-century",
+      "group": "finance",
+      "expression": "dbd(12.3199,1.0100)",
+      "provenance": "R 4.5.3 base::Date arithmetic",
+      "expected": 1
+    },
+    {
+      "id": "dbd-backwards",
+      "group": "finance",
+      "expression": "dbd(12.3124,3.0124)",
+      "provenance": "R 4.5.3 base::Date arithmetic",
+      "expected": -305
+    },
+    {
+      "id": "dbd-invalid-day",
+      "group": "finance",
+      "expression": "dbd(2.3024,3.0124)",
+      "provenance": "calendar rule",
+      "expectedError": "ERR:DOMAIN"
+    },
+    {
+      "id": "base-binary-to-decimal",
+      "group": "base",
+      "expression": "0b1101▸Dec",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expected": 13,
+      "expectedDisplay": "13"
+    },
+    {
+      "id": "base-decimal-to-hex",
+      "group": "base",
+      "expression": "255▸Hex",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expected": 255,
+      "expectedDisplay": "0hFF"
+    },
+    {
+      "id": "base-decimal-to-binary",
+      "group": "base",
+      "expression": "13▸Bin",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expected": 13,
+      "expectedDisplay": "0b1101"
+    },
+    {
+      "id": "base-decimal-to-octal",
+      "group": "base",
+      "expression": "64▸Oct",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expected": 64,
+      "expectedDisplay": "0o100"
+    },
+    {
+      "id": "base-hex-entry",
+      "group": "base",
+      "expression": "0hFF",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expected": 255
+    },
+    {
+      "id": "base-hex-arithmetic",
+      "group": "base",
+      "expression": "0hFF+1",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expected": 256
+    },
+    {
+      "id": "base-negative-hex",
+      "group": "base",
+      "expression": "⁻1▸Hex",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expected": -1,
+      "expectedDisplay": "0hFFFFFFFF"
+    },
+    {
+      "id": "base-non-integer-rejected",
+      "group": "base",
+      "expression": "2.5▸Hex",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expectedError": "ERR:DOMAIN"
+    },
+    {
+      "id": "base-prefix-needs-digits",
+      "group": "base",
+      "expression": "0b",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "setup": [
+        "{1,2,3}→L1",
+        "{2,4,6}→L2",
+        "LinRegAXB(L1,L2)"
+      ],
+      "expected": 0
+    },
+    {
+      "id": "bitwise-and",
+      "group": "base",
+      "expression": "bitAnd(2,3)",
+      "provenance": "R 4.5.3 base::bitwAnd",
+      "expected": 2
+    },
+    {
+      "id": "bitwise-or",
+      "group": "base",
+      "expression": "bitOr(12,10)",
+      "provenance": "R 4.5.3 base::bitwOr",
+      "expected": 14
+    },
+    {
+      "id": "bitwise-xor",
+      "group": "base",
+      "expression": "bitXor(12,10)",
+      "provenance": "R 4.5.3 base::bitwXor",
+      "expected": 6
+    },
+    {
+      "id": "bitwise-not",
+      "group": "base",
+      "expression": "bitNot(12)",
+      "provenance": "R 4.5.3 base::bitwNot",
+      "expected": -13
+    },
+    {
+      "id": "boolean-and-unchanged",
+      "group": "base",
+      "expression": "2 and 3",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expected": 1
+    },
+    {
+      "id": "boolean-not-unchanged",
+      "group": "base",
+      "expression": "not(0)",
+      "provenance": "post-M4 developer decision D22 (worked examples), with R base conversion",
+      "expected": 1
     }
   ]
 }

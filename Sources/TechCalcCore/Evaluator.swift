@@ -40,9 +40,12 @@ public struct Evaluator: Sendable {
             if let container = try applyToContainers(op, lhs, rhs) { return container }
             return try apply(op, lhs, rhs)
 
-        case .displayConversion(_, let inner):
-            // Presentation only: the value itself is unchanged.
-            return try evaluate(inner)
+        case .displayConversion(let id, let inner):
+            // Presentation only: the value itself is unchanged. A base conversion is the one
+            // presentation mark that can fail, because not every number has a binary spelling.
+            let value = try evaluate(inner)
+            try validateBaseConversion(id, value)
+            return value
 
         case .store(let inner, let target):
             let value = try evaluate(inner)
@@ -80,6 +83,7 @@ public struct Evaluator: Sendable {
             }
             if let container = try applyContainerFunction(id, values) { return container }
             if let command = try applyStatisticsCommand(id, values) { return command }
+            if let finance = try applyFinanceFunction(id, values) { return finance }
             if definition.mapsOverLists,
                let mapped = try broadcastOverLists(id, values, { try self.applyScalarFunction(id, $0) }) {
                 return mapped
@@ -294,7 +298,16 @@ public struct Evaluator: Sendable {
              .onePropZTest, .twoPropZTest, .chiSquareTest, .chiSquareGOFTest,
              .twoSampleFTest, .linRegTTest,
              .zInterval, .tInterval, .twoSampleZInterval, .twoSampleTInterval,
-             .onePropZInterval, .twoPropZInterval:
+             .onePropZInterval, .twoPropZInterval, .linRegTInterval,
+             // The FINANCE menu and the bitwise operators are dispatched by
+             // `applyFinanceFunction`; reaching here means an argument was not a real number.
+             .tvmN, .tvmInterest, .tvmPresentValue, .tvmPayment, .tvmFutureValue,
+             .netPresentValue, .internalRateOfReturn,
+             .amortizationBalance, .amortizationPrincipal, .amortizationInterest,
+             .toNominalRate, .toEffectiveRate, .daysBetweenDates,
+             .bitwiseAnd, .bitwiseOr, .bitwiseXor, .bitwiseNot,
+             // The base marks are presentation only, like `▸Frac`, and never arrive as calls.
+             .toBinary, .toHexadecimal, .toOctal:
             throw TIError.dataType
         }
     }

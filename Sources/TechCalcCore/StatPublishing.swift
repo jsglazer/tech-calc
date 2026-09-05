@@ -140,6 +140,23 @@ extension LinRegTestResult: StatisticsPublishing {
     }
 }
 
+extension LinRegIntervalResult: StatisticsPublishing {
+    var published: [StatVariable: Double] {
+        defined([
+            .lowerBound: lower, .upperBound: upper,
+            // The slope is the estimate the interval is about, so it goes to `b`, not to the
+            // point-estimate slot the mean intervals use.
+            .coefficientA: intercept,
+            .coefficientB: slope,
+            .degreesOfFreedom: degreesOfFreedom,
+            .residualDeviation: residualDeviation,
+            .correlation: correlation,
+            .determination: correlation * correlation,
+            .n: n
+        ])
+    }
+}
+
 extension ConfidenceInterval: StatisticsPublishing {
     var published: [StatVariable: Double] {
         defined([

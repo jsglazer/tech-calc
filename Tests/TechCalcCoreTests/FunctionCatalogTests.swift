@@ -106,8 +106,40 @@ struct FunctionCatalogTests {
         .twoSampleZInterval: ["2", "2", sampleX, sampleY, ".95"],
         .twoSampleTInterval: [sampleX, sampleY, ".95", "0"],
         .onePropZInterval: ["40", "100", ".95"],
-        .twoPropZInterval: ["40", "100", "30", "100", ".95"]
+        .twoPropZInterval: ["40", "100", "30", "100", ".95"],
+        .linRegTInterval: [sampleX, sampleY, ".95"],
+
+        // FINANCE. A 24-payment loan at 6% nominal: every TVM entry is exercised on the same
+        // scenario, so a solve that disagrees with its siblings shows up here rather than only in
+        // the fixtures. The arguments are the entry's own field order, minus the unknown.
+        .tvmN: ["6", "10000", "-443.21", "0", "12", "12"],
+        .tvmInterest: ["24", "10000", "-443.21", "0", "12", "12"],
+        .tvmPresentValue: ["24", "6", "-443.21", "0", "12", "12"],
+        .tvmPayment: ["24", "6", "10000", "0", "12", "12"],
+        .tvmFutureValue: ["24", "6", "10000", "-443.21", "12", "12"],
+        .netPresentValue: ["10", "-1000", cashFlows],
+        .internalRateOfReturn: ["-1000", cashFlows],
+        .amortizationBalance: ["1"],
+        .amortizationPrincipal: ["1", "2"],
+        .amortizationInterest: ["1", "2"],
+        .toNominalRate: ["6.168", "12"],
+        .toEffectiveRate: ["6", "12"],
+        // MM.DDYY, the TI's entry-line date format: 1 March 2024 to 31 December 2024.
+        .daysBetweenDates: ["3.0124", "12.3124"],
+
+        // MATH BASE. The bitwise operators take whole numbers; the default `2`s would work, but
+        // naming a pair with a non-trivial answer makes the round-trip test worth reading.
+        .bitwiseAnd: ["12", "10"],
+        .bitwiseOr: ["12", "10"],
+        .bitwiseXor: ["12", "10"],
+        .bitwiseNot: ["12"],
+        .toBinary: ["13"],
+        .toHexadecimal: ["255"],
+        .toOctal: ["64"]
     ]
+
+    /// Four positive flows after an outlay, so `irr(` has a sign change to find.
+    private static let cashFlows = "{300,400,500,600}"
 
     private static let list = "{1,2,3}"
     private static let matrix = "[[1,2][3,4]]"

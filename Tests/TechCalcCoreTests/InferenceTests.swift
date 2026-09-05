@@ -174,4 +174,64 @@ struct InferenceTests {
         #expect((try? calculator.context.statistics.value(of: .tStatistic)) != nil)
         #expect(throws: TIError.undefined) { try calculator.context.statistics.value(of: .zStatistic) }
     }
+
+    // MARK: - The regression-slope interval (D23 carry-over)
+
+    @Test("LinRegTInt brackets the slope its own t test computes")
+    func regressionIntervalAgreesWithTheTest() throws {
+        // R: reg_x 1..8, reg_y the paired values the fixture suite uses.
+        let xs: [Double] = [1, 2, 3, 4, 5, 6, 7, 8]
+        let ys: [Double] = [2.1, 3.9, 6.2, 7.8, 10.1, 12.2, 13.8, 16.1]
+
+        let interval = try Inference.linRegTInt(xs, ys, level: 0.95)
+        let test = try Inference.linRegTTest(xs, ys, alternative: .twoSided)
+
+        // The interval and the test are the same fit, so every shared field must agree exactly.
+        #expect(interval.slope == test.slope)
+        #expect(interval.intercept == test.intercept)
+        #expect(interval.degreesOfFreedom == test.degreesOfFreedom)
+        #expect(interval.residualDeviation == test.residualDeviation)
+        // R: confint(lm(reg_y ~ reg_x))["reg_x", ]
+        expectClose(interval.lower, 1.929593811075, tolerance: 1e-9)
+        expectClose(interval.upper, 2.065644284163, tolerance: 1e-9)
+        // The slope sits at the centre of its own interval.
+        expectClose((interval.lower + interval.upper) / 2, interval.slope)
+    }
+
+    @Test("A wider confidence level gives a wider interval")
+    func regressionIntervalWidensWithTheLevel() throws {
+        let xs: [Double] = [1, 2, 3, 4, 5, 6, 7, 8]
+        let ys: [Double] = [2.1, 3.9, 6.2, 7.8, 10.1, 12.2, 13.8, 16.1]
+        let ninetyFive = try Inference.linRegTInt(xs, ys, level: 0.95)
+        let ninetyNine = try Inference.linRegTInt(xs, ys, level: 0.99)
+        #expect(ninetyNine.marginOfError > ninetyFive.marginOfError)
+    }
+
+    @Test("LinRegTInt publishes the endpoints and the fit, and not x\u{0304}")
+    func regressionIntervalPublishesTheFit() throws {
+        var calculator = Fixture.calculator()
+        calculator.enter("{1,2,3,4,5,6,7,8}→L1")
+        calculator.enter("{2.1,3.9,6.2,7.8,10.1,12.2,13.8,16.1}→L2")
+        calculator.enter("LinRegTInt(L1,L2,.95)")
+
+        let statistics = calculator.context.statistics
+        expectClose(try statistics.value(of: .lowerBound), 1.929593811075, tolerance: 1e-9)
+        expectClose(try statistics.value(of: .upperBound), 2.065644284163, tolerance: 1e-9)
+        expectClose(try statistics.value(of: .degreesOfFreedom), 6)
+        expectClose(try statistics.value(of: .n), 8)
+        // The slope is `b`; the point-estimate slot the mean intervals use stays undefined,
+        // because a slope is not a sample mean.
+        expectClose(try statistics.value(of: .coefficientB), 1.997619047619, tolerance: 1e-9)
+        #expect(statistics[.meanX] == nil)
+    }
+
+    @Test("A level outside (0,1) and a sample too short are TI errors")
+    func regressionIntervalValidatesItsInputs() {
+        let xs: [Double] = [1, 2, 3, 4]
+        let ys: [Double] = [2, 4, 6, 8.1]
+        #expect(throws: TIError.domain) { _ = try Inference.linRegTInt(xs, ys, level: 1) }
+        #expect(throws: TIError.invalidDimension) {
+            _ = try Inference.linRegTInt([1, 2], [2, 4], level: 0.95)
+        }
+    }
 }

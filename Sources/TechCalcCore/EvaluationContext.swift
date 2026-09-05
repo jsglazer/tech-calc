@@ -17,6 +17,9 @@ public struct EvaluationContext: Equatable, Sendable {
     /// What the last `STAT CALC` or `STAT TESTS` command produced. Reading a variable no command
     /// has written is `ERR:UNDEFINED`.
     public var statistics: StatisticsVariables
+    /// The `FINANCE ▸ TVM Solver` fields. The solver screen writes them and the `tvm_…(`,
+    /// `bal(`, `ΣPrn(` and `ΣInt(` commands read them, exactly as on the hardware.
+    public var finance: FinanceVariables
 
     public init(
         mode: CalculatorMode = .default,
@@ -24,7 +27,8 @@ public struct EvaluationContext: Equatable, Sendable {
         ans: TIValueSnapshot = .real(0),
         lists: [ListName: TIList] = [:],
         matrices: [MatrixName: TIMatrix] = [:],
-        statistics: StatisticsVariables = StatisticsVariables()
+        statistics: StatisticsVariables = StatisticsVariables(),
+        finance: FinanceVariables = FinanceVariables()
     ) {
         self.mode = mode
         self.variables = variables
@@ -32,6 +36,7 @@ public struct EvaluationContext: Equatable, Sendable {
         self.lists = lists
         self.matrices = matrices
         self.statistics = statistics
+        self.finance = finance
     }
 
     /// The TI's variable names: the 26 letters plus theta.

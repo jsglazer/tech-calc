@@ -76,6 +76,15 @@ public struct Tokenizer: Sendable {
                 continue
             }
 
+            // A based literal is scanned before the ordinary number, because `0b1101` starts
+            // with a digit the number scanner would happily take on its own. A prefix with no
+            // digits after it is not a literal, so `0b` alone still means zero times `B`.
+            if let match = NumberBases.scanLiteral(characters, at: index) {
+                tokens.append(.number(match.value))
+                index += match.length
+                continue
+            }
+
             if Self.isDigit(character)
                 || (character == "." && index + 1 < characters.count && Self.isDigit(characters[index + 1])) {
                 let (value, length) = try scanNumber(characters, from: index)

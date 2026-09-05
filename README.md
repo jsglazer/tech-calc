@@ -10,28 +10,35 @@ The TI-84 is the reference for *what the calculator can do* and *how its keys ar
 
 ## Status
 
-**Phase M1 of a phased build.** The expression engine is complete and under test; lists, matrices, statistics and finance land in later phases.
+**Feature-complete against the v1 scope.** All four build phases are done and the whole function set is under headless test. What remains before a release is visual QA and packaging on macOS, not more engine work.
 
 | Phase | Scope | State |
 | --- | --- | --- |
 | M1 | Tokenizer, parser, evaluator, scalar function set, MODE, history, persistence | **Done** |
-| M2 | Lists `L1`–`L6`, matrices `[A]`–`[J]`, their editors and operations | Not started |
-| M4 | `STAT CALC`, `DISTR`, `TESTS` — regressions, distributions, hypothesis tests, intervals | Not started |
-| M5 | TVM solver and finance functions, number bases, bitwise operations | Not started |
+| M2 | Lists `L1`–`L6`, matrices `[A]`–`[J]`, their editors and operations | **Done** |
+| M4 | `STAT CALC`, `DISTR`, `TESTS` — regressions, distributions, hypothesis tests, intervals | **Done** |
+| M5 | TVM solver and finance functions, number bases, bitwise operations | **Done** |
 
 Graphing, TI-BASIC, Python and CAS are explicit non-goals.
 
-### Working today
+### The engine
 
 - **One input path.** Keypad presses and typed characters land in the same edit buffer and are lexed by the same tokenizer, so `sin⁻¹(.5)` typed and `sin⁻¹(.5)` keyed are indistinguishable downstream.
 - **TI precedence, exactly.** Implicit multiplication binds as `*` does and groups left to right, so `1/2X` is `(1/2)X`. Negation binds looser than exponentiation, so `-3^2` is `-9` and `(-3)^2` is `9`. `^` is right-associative, so `2^3^2` is `512`. Adjacent calls such as `sin(2)cos(2)` are a product. Unclosed parentheses close themselves on ENTER.
 - **The `2nd` / `ALPHA` state machine**, including single-shot latches and A-LOCK.
-- **Scalar function set:** trigonometry and hyperbolics with their inverses, logarithms and `logBASE(`, roots and powers, `MATH NUM` (`abs` `round` `iPart` `fPart` `int` `min` `max` `lcm` `gcd` `remainder`), `MATH PROB` (`nPr` `nCr` `!` `rand` `randInt(`), `MATH CMPLX` (`conj` `real` `imag` `angle`), `ANGLE` (`°` `ʳ` `R▸Pr(` `R▸Pθ(` `P▸Rx(` `P▸Ry(`), `TEST`/`LOGIC`, and the iterative `fnInt(` `nDeriv(` `Σ(`.
 - **Complex arithmetic**, always computed. `REAL` / `a+bi` / `re^θi` governs presentation and whether a complex answer is refused as `ERR:NONREAL ANS` — there is no separate real code path to drift out of step.
 - **`MODE`:** DEG/RAD, NORMAL/SCI/ENG, FLOAT and fixed 0–9, the complex modes, and answer as auto/decimal/fraction. `▸Frac` reconstructs a rational up to denominator 9999.
 - **`Ans`, `STO▸`, variables `A`–`Z` and `θ`**, and `STO▸rand` to reseed.
 - **History** of up to 500 entry/result pairs, selectable, with tap-to-reinsert and `2ND ENTRY` recall.
 - **Error parity.** Errors carry TI names — `ERR:SYNTAX`, `ERR:DOMAIN`, `ERR:DIVIDE BY 0`, `ERR:NONREAL ANS`, and the rest — because getting the *right* error is part of matching the calculator.
+
+### The function set
+
+- **Scalar:** trigonometry and hyperbolics with their inverses, logarithms and `logBASE(`, roots and powers, `MATH NUM` (`abs` `round` `iPart` `fPart` `int` `min` `max` `lcm` `gcd` `remainder`), `MATH PROB` (`nPr` `nCr` `!` `rand` `randInt(` `randNorm(` `randBin(` `randIntNoRep(`), `MATH CMPLX` (`conj` `real` `imag` `angle`), `ANGLE` (`°` `ʳ` `R▸Pr(` `R▸Pθ(` `P▸Rx(` `P▸Ry(`), `TEST`/`LOGIC`, and the iterative `fnInt(` `nDeriv(` `Σ(`.
+- **Lists and matrices:** `L1`–`L6` and named lists, `[A]`–`[J]`, list literals and matrix literals, element-wise broadcasting, `SortA(` `SortD(` `dim(` `Fill(` `seq(` `cumSum(` `ΔList(` `augment(` `List▸matr(` `Matr▸list(`, the `LIST MATH` reductions, and `det(` `T` `identity(` `randM(` `ref(` `rref(` with the row operations. Indexing is 1-based, and the matrix work is pure Swift Gaussian elimination with an explicit singularity tolerance.
+- **Statistics:** `1-Var Stats`, `2-Var Stats`, and eight regression families; the whole `DISTR` menu (normal, Student *t*, chi-square, *F*, binomial, Poisson, geometric) with their inverses; ten hypothesis tests including Welch degrees of freedom; and seven confidence intervals including `LinRegTInt`.
+- **Finance:** the TVM equation solved for any of `N`, `I%`, `PV`, `PMT` and `FV`, with `P/Y`, `C/Y` and BEGIN/END timing; `npv(` `irr(` `bal(` `ΣPrn(` `ΣInt(` `▸Nom(` `▸Eff(` `dbd(`.
+- **Number bases:** `0b` and `0h` entry, `▸Bin` `▸Hex` `▸Oct` `▸Dec` display, and `bitAnd(` `bitOr(` `bitXor(` `bitNot(` over a 32-bit two's-complement word. The bitwise functions are deliberately *separate* from the TI's boolean `and` / `or` / `xor` / `not`, which keep their 0/1 semantics unchanged.
 
 ## Install
 
@@ -62,7 +69,9 @@ A few load-bearing decisions:
 - **One `FunctionCatalog`** declares every supported function once — name, arity, argument labels, menu path, keypad token. The tokenizer, the parser, the menus and the keypad all read it, so a function's spelling exists in exactly one place.
 - **One `TIValue`** crosses the evaluator, and complex arithmetic is unconditional.
 - **`Double` throughout**, with parity achieved at the display layer: results round to 10 significant digits and the formatter honours the notation and decimal settings. The TI's 14-digit BCD representation is not reproduced.
-- **Every iterative routine is step-limited** — Romberg integration caps at 20 refinement levels, summation at a million terms — and throws `ERR:ITERATIONS` rather than spinning.
+- **Every iterative routine is step-limited** — Romberg integration caps at 20 refinement levels, summation at a million terms, the distribution inverses and the `I%` / `irr(` root-finds at 200 — and throws `ERR:ITERATIONS` rather than spinning.
+- **One solver per job.** Every distribution inverse routes through a single bracketed bisection-with-Newton; `I%` and `irr(` share a single bisection-with-secant. There is one convergence policy to audit, not one per function.
+- **No statistical or financial arithmetic in a view.** Every test, interval, regression and TVM solve is a pure function over an input struct; the form screens and the typed command form are two callers of it.
 - **1-based indexing** at the TI syntax layer, with the conversion to Swift's 0-based indices confined to a single accessor per container type.
 
 ## Tests
@@ -71,7 +80,9 @@ A few load-bearing decisions:
 swift test
 ```
 
-94 tests across 12 suites, all headless, all deterministic: parser precedence and syntax, the keypad modifier state machine, scalar evaluation and error parity, display formatting, persistence roundtrips, seeded randomness, iterative numerics, 1-based indexing, a walk of the entire function catalog, and mechanical checks that the core's source contains none of the banned imports or unseeded randomness.
+238 tests across 23 suites, all headless, all deterministic: parser precedence and syntax, the keypad modifier state machine, scalar evaluation and error parity, display formatting, persistence roundtrips, seeded randomness, iterative numerics, 1-based indexing, list and matrix operations, the statistics and finance engines, number bases, a walk of the entire function catalog, and mechanical checks that the core's source contains none of the banned imports or unseeded randomness.
+
+Inside that run is a 164-case TI-84 benchmark suite. **No expected value in it was produced by running tech-calc**: each entry carries a provenance naming R 4.5.3 (`stats::pnorm`, `stats::lm`, `stats::t.test`, `stats::uniroot`, …), the TI-84 Plus CE guidebook's documented rule evaluated in R, or a recorded developer decision — and the runner fails the build on a fixture that has no provenance or that names the code under test. The suite is regenerated by `~/.claude/scripts/techcalc-fixtures.R` rather than kept as a frozen blob.
 
 ## Licence
 

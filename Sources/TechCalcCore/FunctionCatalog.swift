@@ -52,7 +52,16 @@ public enum FunctionID: String, Equatable, Hashable, Sendable, CaseIterable, Cod
     case onePropZTest, twoPropZTest, chiSquareTest, chiSquareGOFTest, twoSampleFTest, linRegTTest
     // STAT TESTS — confidence intervals
     case zInterval, tInterval, twoSampleZInterval, twoSampleTInterval
-    case onePropZInterval, twoPropZInterval
+    case onePropZInterval, twoPropZInterval, linRegTInterval
+    // FINANCE — the TVM solver, one entry per unknown
+    case tvmN, tvmInterest, tvmPresentValue, tvmPayment, tvmFutureValue
+    // FINANCE — cash flows, amortization, rate conversion and dates
+    case netPresentValue, internalRateOfReturn
+    case amortizationBalance, amortizationPrincipal, amortizationInterest
+    case toNominalRate, toEffectiveRate, daysBetweenDates
+    // BASE — display conversions and the bitwise operators
+    case toBinary, toHexadecimal, toOctal
+    case bitwiseAnd, bitwiseOr, bitwiseXor, bitwiseNot
 }
 
 /// How an entry is written in an expression.
@@ -404,7 +413,64 @@ public enum FunctionCatalog {
         FunctionDefinition(id: .onePropZInterval, name: "1-PropZInt", menuPath: "STAT TESTS", arity: 3...3,
                            argumentLabels: ["x", "n", "level"], mapsOverLists: false),
         FunctionDefinition(id: .twoPropZInterval, name: "2-PropZInt", menuPath: "STAT TESTS", arity: 5...5,
-                           argumentLabels: ["x1", "n1", "x2", "n2", "level"], mapsOverLists: false)
+                           argumentLabels: ["x1", "n1", "x2", "n2", "level"], mapsOverLists: false),
+        // The interval on a regression slope. It shares `Inference`'s interval machinery with the
+        // entries above and is the M4 carry-over the post-M4 decisions (D23) put at the head of M5.
+        FunctionDefinition(id: .linRegTInterval, name: "LinRegTInt", menuPath: "STAT TESTS", arity: 3...3,
+                           argumentLabels: ["listX", "listY", "level"], mapsOverLists: false),
+
+        // MARK: FINANCE CALC — the TVM solver. The five entries solve one equation for five
+        // different unknowns; an argument the caller omits is read from the stored TVM variables,
+        // so `tvm_Pmt()` after filling the solver screen means what it does on the hardware.
+        FunctionDefinition(id: .tvmN, name: "tvm_N", menuPath: "FINANCE CALC", arity: 0...6,
+                           argumentLabels: ["I%", "PV", "PMT", "FV", "P/Y", "C/Y"], mapsOverLists: false),
+        FunctionDefinition(id: .tvmInterest, name: "tvm_I%", menuPath: "FINANCE CALC", arity: 0...6,
+                           argumentLabels: ["N", "PV", "PMT", "FV", "P/Y", "C/Y"], mapsOverLists: false),
+        FunctionDefinition(id: .tvmPresentValue, name: "tvm_PV", menuPath: "FINANCE CALC", arity: 0...6,
+                           argumentLabels: ["N", "I%", "PMT", "FV", "P/Y", "C/Y"], mapsOverLists: false),
+        FunctionDefinition(id: .tvmPayment, name: "tvm_Pmt", menuPath: "FINANCE CALC", arity: 0...6,
+                           argumentLabels: ["N", "I%", "PV", "FV", "P/Y", "C/Y"], mapsOverLists: false),
+        FunctionDefinition(id: .tvmFutureValue, name: "tvm_FV", menuPath: "FINANCE CALC", arity: 0...6,
+                           argumentLabels: ["N", "I%", "PV", "PMT", "P/Y", "C/Y"], mapsOverLists: false),
+
+        // MARK: FINANCE CALC — cash flows and amortization. The amortization trio reads the same
+        // stored TVM variables the solver writes, as it does on the hardware.
+        FunctionDefinition(id: .netPresentValue, name: "npv", menuPath: "FINANCE CALC", arity: 3...4,
+                           argumentLabels: ["rate", "CF0", "CFList", "CFFreq"], mapsOverLists: false),
+        FunctionDefinition(id: .internalRateOfReturn, name: "irr", menuPath: "FINANCE CALC", arity: 2...3,
+                           argumentLabels: ["CF0", "CFList", "CFFreq"], mapsOverLists: false),
+        FunctionDefinition(id: .amortizationBalance, name: "bal", menuPath: "FINANCE CALC", arity: 1...2,
+                           argumentLabels: ["payment", "decimals"], mapsOverLists: false),
+        FunctionDefinition(id: .amortizationPrincipal, name: "\u{03A3}Prn", menuPath: "FINANCE CALC", arity: 2...3,
+                           argumentLabels: ["first", "last", "decimals"], mapsOverLists: false),
+        FunctionDefinition(id: .amortizationInterest, name: "\u{03A3}Int", menuPath: "FINANCE CALC", arity: 2...3,
+                           argumentLabels: ["first", "last", "decimals"], mapsOverLists: false),
+        FunctionDefinition(id: .toNominalRate, name: "\u{25B8}Nom", menuPath: "FINANCE CALC", arity: 2...2,
+                           argumentLabels: ["effective", "periods"], mapsOverLists: false),
+        FunctionDefinition(id: .toEffectiveRate, name: "\u{25B8}Eff", menuPath: "FINANCE CALC", arity: 2...2,
+                           argumentLabels: ["nominal", "periods"], mapsOverLists: false),
+        FunctionDefinition(id: .daysBetweenDates, name: "dbd", menuPath: "FINANCE CALC", arity: 2...2,
+                           argumentLabels: ["date1", "date2"], mapsOverLists: false),
+
+        // MARK: MATH BASE. The TI-84 Plus CE has no BASE menu, so this is beyond TI parity and
+        // the post-M4 decisions (D22) fix its shape: the bitwise operators are *named functions*,
+        // distinct from the boolean `and`/`or`/`xor`/`not` the TEST LOGIC menu already declares,
+        // so no expression that was already valid changes meaning. `\u{25B8}Dec` is not redeclared here —
+        // the MATH MATH entry above already means "show this answer in base ten".
+        FunctionDefinition(id: .toBinary, name: "\u{25B8}Bin", menuPath: "MATH BASE", form: .displayConversion,
+                           arity: 1...1, argumentLabels: ["value"]),
+        FunctionDefinition(id: .toHexadecimal, name: "\u{25B8}Hex", menuPath: "MATH BASE", form: .displayConversion,
+                           arity: 1...1, argumentLabels: ["value"]),
+        FunctionDefinition(id: .toOctal, name: "\u{25B8}Oct", menuPath: "MATH BASE", form: .displayConversion,
+                           arity: 1...1, argumentLabels: ["value"]),
+        FunctionDefinition(id: .bitwiseAnd, name: "bitAnd", menuPath: "MATH BASE", arity: 2...2,
+                           argumentLabels: ["valueA", "valueB"]),
+        FunctionDefinition(id: .bitwiseOr, name: "bitOr", menuPath: "MATH BASE", arity: 2...2,
+                           argumentLabels: ["valueA", "valueB"]),
+        FunctionDefinition(id: .bitwiseXor, name: "bitXor", menuPath: "MATH BASE", arity: 2...2,
+                           argumentLabels: ["valueA", "valueB"]),
+        FunctionDefinition(id: .bitwiseNot, name: "bitNot", menuPath: "MATH BASE", arity: 1...1,
+                           argumentLabels: ["value"])
     ]
 
     /// Every tokenizable spelling mapped to its definition, longest names first so the

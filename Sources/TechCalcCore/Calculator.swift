@@ -96,6 +96,12 @@ public struct Calculator: Sendable {
         }
         let formatter = DisplayFormatter(mode: effectiveMode)
 
+        // A base conversion replaces the numeral entirely rather than adjusting the mode, and the
+        // evaluator has already rejected any value that has no spelling in that base.
+        if let conversion, let text = NumberBases.text(for: value, conversion: conversion) {
+            return text
+        }
+
         let wantsFraction = conversion == .toFraction
             || (conversion != .toDecimal && context.mode.answer == .fraction)
         return wantsFraction ? formatter.fractionString(for: value) : formatter.string(for: value)
