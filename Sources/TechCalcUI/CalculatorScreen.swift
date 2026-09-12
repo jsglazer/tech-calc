@@ -140,12 +140,26 @@ struct CalculatorPane: View {
             KeypadView(model: model)
         }
         .background(palette.background)
+        #if os(iOS)
+        // A plain .navigationTitle can't be resized — the standard inline title runs ~17pt, so
+        // this stands in at 70% of that to give the now-taller number pad more room.
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("TechCalc").font(.system(size: 12, weight: .semibold))
+            }
+            ToolbarItem {
+                Button("Copy as Markdown") { model.copyToPasteboard(model.markdownExport) }
+            }
+        }
+        #else
         .navigationTitle("TechCalc")
         .toolbar {
             ToolbarItem {
                 Button("Copy as Markdown") { model.copyToPasteboard(model.markdownExport) }
             }
         }
+        #endif
     }
 }
 
@@ -158,37 +172,68 @@ struct HistoryPane: View {
     let model: CalculatorModel
     @Environment(\.palette) private var palette
 
-    private let entryFontSize: CGFloat = 13
-    private let resultFontSize: CGFloat = 17
+    // Shrunk from 13/17 so the pane still reads comfortably at the height left over once the
+    // number pad grew.
+    private let entryFontSize: CGFloat = 11
+    private let resultFontSize: CGFloat = 14
+
+    /// The right column is the original single-column feed, unchanged, just capped at six rows:
+    /// entries flow in at its bottom exactly as they always did. Once a seventh arrives, the entry
+    /// at the top of that six — the one about to be crowded out — moves instead into the bottom of
+    /// the left column, which is a plain growing archive of everything that has aged out this way.
+    private static let activeRowCount = 6
+
+    private var archiveEntries: [HistoryEntry] {
+        Array(model.entries.dropLast(min(Self.activeRowCount, model.entries.count)))
+    }
+
+    private var activeEntries: [HistoryEntry] {
+        Array(model.entries.suffix(Self.activeRowCount))
+    }
 
     var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            scrollingColumn(archiveEntries)
+            Divider()
+            scrollingColumn(activeEntries)
+        }
+        .background(palette.display)
+    }
+
+    /// Each column pins to its own bottom as it grows — the archive when something ages into it,
+    /// the active column when a fresh result arrives — exactly like the single-column feed used to.
+    private func scrollingColumn(_ entries: [HistoryEntry]) -> some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .trailing, spacing: 10) {
-                    ForEach(model.entries) { entry in
-                        VStack(alignment: .trailing, spacing: 2) {
-                            typeset(model.inputNode(for: entry), fallback: entry.input, size: entryFontSize)
-                                .foregroundStyle(palette.displaySecondaryText)
-                                .onTapGesture { model.insert(entry: entry, useResult: false) }
-
-                            typeset(model.resultNode(for: entry), fallback: entry.display, size: resultFontSize)
-                                .foregroundStyle(entry.isError ? palette.errorText : palette.displayText)
-                                .onTapGesture { model.insert(entry: entry, useResult: true) }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .contextMenu {
-                            Button("Copy as LaTeX") { model.copyToPasteboard(model.latex(for: entry)) }
-                        }
-                        .id(entry.id)
-                    }
-                }
-                .padding(12)
+                column(entries)
+                    .padding(8)
             }
-            .background(palette.display)
-            .onChange(of: model.entries.count) {
-                if let last = model.entries.last { proxy.scrollTo(last.id, anchor: .bottom) }
+            .onChange(of: entries.count) {
+                if let last = entries.last { proxy.scrollTo(last.id, anchor: .bottom) }
             }
         }
+    }
+
+    private func column(_ entries: [HistoryEntry]) -> some View {
+        LazyVStack(alignment: .trailing, spacing: 10) {
+            ForEach(entries) { entry in
+                VStack(alignment: .trailing, spacing: 2) {
+                    typeset(model.inputNode(for: entry), fallback: entry.input, size: entryFontSize)
+                        .foregroundStyle(palette.displaySecondaryText)
+                        .onTapGesture { model.insert(entry: entry, useResult: false) }
+
+                    typeset(model.resultNode(for: entry), fallback: entry.display, size: resultFontSize)
+                        .foregroundStyle(entry.isError ? palette.errorText : palette.displayText)
+                        .onTapGesture { model.insert(entry: entry, useResult: true) }
+                }
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .contextMenu {
+                    Button("Copy as LaTeX") { model.copyToPasteboard(model.latex(for: entry)) }
+                }
+                .id(entry.id)
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder
@@ -215,7 +260,9 @@ struct EntryLine: View {
                 set: { model.setEntryText($0) }
             ))
             .textFieldStyle(.plain)
-            .font(.system(.title3, design: .monospaced))
+            // Was .title3 (~20pt) with 12pt padding — shrunk along with the readout, since at
+            // its old size this row alone was eating the space the taller number pad needed.
+            .font(.system(size: 15, design: .monospaced))
             .foregroundStyle(palette.displayText)
             .onSubmit { model.submit() }
             #if os(iOS)
@@ -237,7 +284,7 @@ struct EntryLine: View {
                 statusChip(model.modifier == .alphaLock ? "A-LOCK" : model.modifier.rawValue.uppercased())
             }
         }
-        .padding(12)
+        .padding(8)
         .background(palette.display)
     }
 

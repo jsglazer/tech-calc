@@ -140,7 +140,12 @@ public final class CalculatorModel {
         buffer.backspace()
     }
 
+    /// CLEAR erases the entry line; pressed again on an already-empty line, it wipes the whole
+    /// display, matching the hardware rather than being a no-op once there's nothing left to type.
     public func clear() {
+        if buffer.text.isEmpty {
+            clearHistory()
+        }
         buffer.clear()
         keypad.clear()
         recallIndex = -1

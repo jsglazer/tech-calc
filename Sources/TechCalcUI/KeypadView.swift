@@ -57,19 +57,27 @@ enum KeypadMetrics {
     /// The printed strip above a key, where the 2nd and ALPHA faces live on the case.
     static let legendHeight: CGFloat = 11
     static let keyHeight: CGFloat = 27
+    /// The number pad reads more easily 50% taller than the rest of the keys.
+    static let numberKeyHeight: CGFloat = keyHeight * 1.5
     static var cellHeight: CGFloat { legendHeight + keyHeight + 2 }
 }
 
-/// One hardware row.
+/// One hardware row. A row that carries a digit key grows as a whole, so its function/arithmetic
+/// neighbors stay lined up with the taller digit keys beside them rather than only the digit
+/// itself growing and leaving the row uneven.
 private struct KeypadRow: View {
     let model: CalculatorModel
     let keys: [KeypadKey]
     let spacing: CGFloat
 
+    private var height: CGFloat {
+        keys.contains { $0.style == .digit } ? KeypadMetrics.numberKeyHeight : KeypadMetrics.keyHeight
+    }
+
     var body: some View {
         HStack(spacing: spacing) {
             ForEach(keys) { key in
-                KeyCell(model: model, key: key)
+                KeyCell(model: model, key: key, height: height)
             }
         }
     }
@@ -79,6 +87,7 @@ private struct KeypadRow: View {
 private struct KeyCell: View {
     let model: CalculatorModel
     let key: KeypadKey
+    let height: CGFloat
     @Environment(\.palette) private var palette
 
     private var layer: KeypadLayer { model.modifier.layer }
@@ -121,7 +130,7 @@ private struct KeyCell: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
                 .padding(.horizontal, 2)
-                .frame(maxWidth: .infinity, minHeight: KeypadMetrics.keyHeight)
+                .frame(maxWidth: .infinity, minHeight: height)
                 .foregroundStyle(foreground)
                 .background(fill, in: RoundedRectangle(cornerRadius: 5))
                 .overlay(
