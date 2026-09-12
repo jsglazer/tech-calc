@@ -43,6 +43,12 @@ public enum Screen: String, CaseIterable, Identifiable, Hashable {
 public struct CalculatorScreen: View {
     @Bindable private var model: CalculatorModel
     @Environment(\.colorScheme) private var systemScheme
+    #if os(iOS)
+    // NavigationSplitView's columnVisibility changed state correctly (confirmed by logging) but
+    // never rendered the push on-device — a stack-based push sidesteps that split-view machinery
+    // entirely and is the more idiomatic iPhone pattern besides.
+    @State private var path: [Screen] = []
+    #endif
 
     public init(model: CalculatorModel) {
         _model = Bindable(wrappedValue: model)
@@ -53,9 +59,21 @@ public struct CalculatorScreen: View {
         CalculatorPalette.resolve(theme: model.theme, systemScheme: systemScheme)
     }
 
+    private static var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+    }
+
+    private var versionFooter: some View {
+        Text("v\(Self.appVersion)")
+            .font(.caption)
+            .foregroundStyle(Color.gray.opacity(0.6))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+    }
+
     public var body: some View {
+        #if os(macOS)
         NavigationSplitView {
-            #if os(macOS)
             List(Screen.allCases, selection: Binding(
                 get: { model.screen },
                 set: { model.screen = $0 ?? model.screen }
@@ -63,32 +81,49 @@ public struct CalculatorScreen: View {
                 Label(item.rawValue, systemImage: item.symbol).tag(item)
             }
             .navigationSplitViewColumnWidth(min: 160, ideal: 180)
-            #else
-            // iOS has no sidebar selection binding on a plain List, so the rows are buttons. The
-            // detail switch below is unchanged: only the way a row is chosen differs.
-            List {
-                ForEach(Screen.allCases) { item in
-                    Button { model.screen = item } label: {
-                        Label(item.rawValue, systemImage: item.symbol)
-                    }
-                }
-            }
-            #endif
+            .safeAreaInset(edge: .bottom) { versionFooter }
         } detail: {
-            switch model.screen {
-            case .calculator: CalculatorPane(model: model)
-            case .lists: ListEditorScreen(model: model)
-            case .matrices: MatrixEditorScreen(model: model)
-            case .statTests: StatTestsScreen(model: model)
-            case .finance: TVMSolverScreen(model: model)
-            case .mode: ModeScreen(model: model)
-            }
+            destination(for: model.screen)
         }
         .environment(\.palette, palette)
         .preferredColorScheme(model.theme.colorScheme)
-        #if os(macOS)
         .frame(minWidth: 720, minHeight: 780)
+        #else
+        NavigationStack(path: $path) {
+            List(Screen.allCases) { item in
+                Button {
+                    model.screen = item
+                    path = [item]
+                } label: {
+                    Label(item.rawValue, systemImage: item.symbol)
+                }
+            }
+            .safeAreaInset(edge: .bottom) { versionFooter }
+            .navigationDestination(for: Screen.self) { item in
+                destination(for: item)
+            }
+            .navigationTitle("TechCalc")
+        }
+        // Keeps the keypad's own menu keys (which jump screens by setting `model.screen`
+        // directly, from inside an already-pushed screen) in sync with the stack.
+        .onChange(of: model.screen) { _, newValue in
+            path = [newValue]
+        }
+        .environment(\.palette, palette)
+        .preferredColorScheme(model.theme.colorScheme)
         #endif
+    }
+
+    @ViewBuilder
+    private func destination(for screen: Screen) -> some View {
+        switch screen {
+        case .calculator: CalculatorPane(model: model)
+        case .lists: ListEditorScreen(model: model)
+        case .matrices: MatrixEditorScreen(model: model)
+        case .statTests: StatTestsScreen(model: model)
+        case .finance: TVMSolverScreen(model: model)
+        case .mode: ModeScreen(model: model)
+        }
     }
 }
 

@@ -77,6 +77,12 @@ public final class CalculatorModel {
     }
 
     public func setEntryText(_ text: String) {
+        // Typing an operator onto a blank line continues from the last result exactly as pressing
+        // one does — the hardware never makes you retype `Ans` just because you used the keyboard.
+        if buffer.text.isEmpty, Tokenizer.isBinaryOperatorSpelling(text) {
+            buffer.replace(with: Tokenizer.answerSpelling + text)
+            return
+        }
         buffer.replace(with: text)
     }
 
@@ -89,6 +95,11 @@ public final class CalculatorModel {
         unavailableKeyLabel = nil
         switch face.effect {
         case .insert(let token):
+            // Pressing an operator on a blank line continues from the last result, as the
+            // hardware does, instead of requiring it to be retyped.
+            if buffer.text.isEmpty, Tokenizer.isBinaryOperatorSpelling(token) {
+                buffer.insert(Tokenizer.answerSpelling)
+            }
             buffer.insert(token)
             recallIndex = -1
         case .delete:

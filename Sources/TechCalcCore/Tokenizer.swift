@@ -52,6 +52,16 @@ public struct Tokenizer: Sendable {
     /// Longest-match punctuation, so `≥`'s ASCII spelling `>=` is not read as `>` then `=`.
     private static let sortedPunctuation = punctuation.sorted { $0.text.count > $1.text.count }
 
+    /// True for a spelling that lexes as a binary operator — used by the shell to know when a
+    /// press on an empty entry line should pull `Ans` in as the left operand, exactly as the
+    /// hardware does rather than requiring the previous result to be retyped.
+    public static func isBinaryOperatorSpelling(_ text: String) -> Bool {
+        punctuation.contains { entry in
+            guard case .binaryOperator = entry.token else { return false }
+            return entry.text == text
+        }
+    }
+
     /// ASCII digits only. Swift reports the superscripts `²` and `³` as numbers, and they are
     /// postfix operators here, not digits.
     static func isDigit(_ character: Character) -> Bool {
