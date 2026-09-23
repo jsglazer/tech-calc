@@ -1,5 +1,7 @@
 # tech-calc
 
+[![GitHub release](https://img.shields.io/github/v/release/jsglazer/tech-calc?logo=github)](https://github.com/jsglazer/tech-calc/releases) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/jsglazer/tech-calc/blob/main/LICENSE) [![Made with Claude](https://img.shields.io/badge/Made_with-Claude-D97756?logo=anthropic)](https://claude.ai)
+
 A native scientific calculator for macOS and iOS with the function set of a TI-84 Plus CE — driven either by the familiar keypad or by free-form typed expressions, with a result history you can actually read, select, and copy.
 
 ## Why
@@ -27,6 +29,7 @@ Graphing, TI-BASIC, Python and CAS are explicit non-goals.
 - **The keypad, key for key.** Five columns and ten rows, with the arrow pad spanning the right of rows 2 and 3 — every key in its printed position, its `2nd` and `ALPHA` faces silkscreened above it as the case prints them. A key carries three *faces*, each a label plus an effect, so a key can type, edit, move the caret or open a screen: `mode` and `2nd QUIT` move between `MODE` and the home screen, `stat` and `2nd LIST` open the list editor, `2nd MATRIX` the matrix editor, `2nd DISTR` the stat tests, `apps` the TVM solver. The arrows walk the entry line and the entry history; `2nd INS` flips the buffer to overwrite. The `ALPHA` letters run `A`–`Z` then `θ` in the order the case prints them, taken from the evaluator's own variable names so the keypad cannot offer a name the evaluator would reject.
 
   Faces the TI prints that this build has no feature for — the whole graphing row, `math`, `prgm`, `vars`, `on`/`off`, `link`, `angle`, `draw`, `test`, `rcl`, `mem`, `catalog`, `solve`, and the sequence variables `u`/`v`/`w` — are drawn in their true positions and dimmed rather than dropped, so the layout matches the hardware without inventing behaviour. Pressing one names itself and does nothing.
+- **One screen list.** On macOS the screens sit in a sidebar. On iPhone they sit in a navigation stack that opens straight onto the calculator, with the screen list one Back tap away; the keypad's menu keys move between screens on both.
 - **Two skins.** System, Light, or Cyan Dark — cyan on black — chosen in `MODE ▸ Theme`. The views read a palette from the environment rather than naming colours, so the two skins differ in exactly one file. The choice is stored beside the document, not inside it, so a saved calculator stays portable.
 - **Typeset results.** Fractions are built up, radicals are stroked, exponents and subscripts are set at script size, and matrices are bracketed and column-aligned — drawn by a recursive SwiftUI view over the evaluator's own AST. There is no web view and no third-party typesetting library, and the geometry is computed in `TechCalcCore` as pure values, so a layout is asserted in a test rather than by looking at it.
 - **Copy as LaTeX, export as Markdown.** A separate AST-to-LaTeX serializer serves the clipboard and the export; nothing on screen is drawn through LaTeX.
