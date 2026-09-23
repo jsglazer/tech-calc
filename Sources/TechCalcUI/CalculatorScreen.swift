@@ -47,11 +47,16 @@ public struct CalculatorScreen: View {
     // NavigationSplitView's columnVisibility changed state correctly (confirmed by logging) but
     // never rendered the push on-device — a stack-based push sidesteps that split-view machinery
     // entirely and is the more idiomatic iPhone pattern besides.
-    @State private var path: [Screen] = []
+    @State private var path: [Screen]
     #endif
 
     public init(model: CalculatorModel) {
         _model = Bindable(wrappedValue: model)
+        #if os(iOS)
+        // Launch straight into the model's screen (the calculator by default) with the menu one
+        // Back tap away, rather than landing on the menu.
+        _path = State(initialValue: [model.screen])
+        #endif
     }
 
     /// The screen selection lives on the model because the keypad's menu keys move it too.
